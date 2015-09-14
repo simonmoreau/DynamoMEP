@@ -1,0 +1,13 @@
+<Workspace Version="0.8.2.1555" X="39.3673895625" Y="57.714584828125" zoom="0.593767140625" Name="Home" RunType="Manual" RunPeriod="1000" HasRunWithoutCrash="False">
+  <NamespaceResolutionMap />
+  <Elements>
+    <DSRevitNodesUI.Categories guid="28e2d6f7-f31e-4028-a6c8-d5ef8691ecce" type="DSRevitNodesUI.Categories" nickname="Categories" x="69" y="134" isVisible="true" isUpstreamVisible="true" lacing="Disabled" index="559:MEPSpaces" />
+    <DSRevitNodesUI.ElementsOfCategory guid="70c8bb1c-ba97-49a8-b008-307e496a6eaa" type="DSRevitNodesUI.ElementsOfCategory" nickname="All Elements of Category" x="350" y="137" isVisible="true" isUpstreamVisible="true" lacing="Disabled" />
+    <Dynamo.Nodes.DSFunction guid="28713f9f-41c6-4cc2-a65b-1fd44436e288" type="Dynamo.Nodes.DSFunction" nickname="Space.FromElement" x="631.149605181135" y="114.369247577248" isVisible="true" isUpstreamVisible="true" lacing="Shortest" assembly="..\..\src\bin\Debug\DynamoMEP.dll" function="Revit.Elements.Space.FromElement@Revit.Elements.Element" />
+  </Elements>
+  <Connectors>
+    <Dynamo.Models.ConnectorModel start="28e2d6f7-f31e-4028-a6c8-d5ef8691ecce" start_index="0" end="70c8bb1c-ba97-49a8-b008-307e496a6eaa" end_index="0" portType="0" />
+  </Connectors>
+  <Notes />
+  <Annotations />
+</Workspace>

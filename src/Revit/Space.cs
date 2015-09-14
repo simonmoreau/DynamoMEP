@@ -8,6 +8,7 @@ using Revit.GeometryConversion;
 using RevitServices.Persistence;
 using RevitServices.Transactions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Revit.Elements
 {
@@ -84,7 +85,7 @@ namespace Revit.Elements
             var roomElem = ElementBinder.GetElementFromTrace<DB.Mechanical.Space>(document);
 
             if (roomElem == null)
-                roomElem = document.Create.NewSpace(level,point);
+                roomElem = document.Create.NewSpace(level, point);
 
             InternalSetSpace(roomElem);
 
@@ -121,7 +122,8 @@ namespace Revit.Elements
         #region Public static constructors
 
         /// <summary>
-        /// Create an element based Tag
+        /// Create a MEP Space
+        /// based on a location and a level
         /// </summary>
         /// <param name="point">Location point for the space</param>
         /// <param name="level">Level of the space</param>
@@ -134,6 +136,84 @@ namespace Revit.Elements
 
             return new Space(revitLevel, uv);
         }
+
+        /// <summary>
+        /// Create a MEP Space
+        /// from an existing MEP Space
+        /// </summary>
+        /// <param name="element">The origin element</param>
+        /// <returns></returns>
+        public static Space FromElement(Element element)
+        {
+            if (element.InternalElement.GetType() == typeof(DB.Mechanical.Space))
+            {
+                return new Space(element.InternalElement as DB.Mechanical.Space);
+            }
+            else
+            {
+                throw new ArgumentException("The Element is not a MEP Space");
+            }
+        }
+
+        #endregion
+
+        #region public properties
+
+        /// <summary>
+        /// Retrive a set of properties 
+        /// for the Space
+        /// </summary>
+        /// <returns name="Name">The MEPSpace Name</returns>
+        /// <returns name="Number">The MEPSpace Number</returns>
+        /// <returns name="Room Name">The associated room Name</returns>
+        /// <returns name="Room Number">The associated room Number</returns>
+        [MultiReturn(new[] { "Name", "Number", "Room Number", "Room Name" })]
+        public Dictionary<string, string> IdentificationData()
+        {
+            string roomName = "Unoccupied";
+            string roomNumber = "Unoccupied";
+            if (InternalSpace.Room != null)
+            {
+                roomName = InternalSpace.Room.Name;
+                roomNumber = InternalSpace.Room.Number;
+            }
+                return new Dictionary<string, string>()
+                {
+                    {"Name",InternalSpace.Name},
+                    {"Number",InternalSpace.Number},
+                    {"Room Name",roomName},
+                    {"Room Number",roomNumber}
+                };
+        }
+
+        /// <summary>
+        /// Retrive space boundaries
+        /// </summary>
+        public List<Element> Boundaries
+        {
+            get
+            {
+                List<Element> output = new List<Element>();
+                DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
+                DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
+                
+                foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(opt))
+                {
+                    foreach (DB.BoundarySegment segment in segments)
+                    {
+                        DB.Element boundaryElement = doc.GetElement(segment.ElementId);
+
+                        output.Add(ElementWrapper.ToDSType(boundaryElement, true));
+                    }
+                    
+                }
+                output = output.Distinct().ToList();
+                return output;
+            }
+        }
+
+        
+
 
         #endregion
 

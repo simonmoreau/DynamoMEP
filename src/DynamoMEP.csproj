@@ -34,28 +34,28 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DynamoServices, Version=0.8.2.2427, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\DynamoVisualProgramming.ZeroTouchLibrary.0.8.2\lib\net40\DynamoServices.dll</HintPath>
+    <Reference Include="DynamoServices">
+      <HintPath>C:\Program Files\Dynamo 0.8\DynamoServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ProtoGeometry, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\DynamoVisualProgramming.ZeroTouchLibrary.0.8.2\lib\net40\ProtoGeometry.dll</HintPath>
+    <Reference Include="ProtoGeometry">
+      <HintPath>C:\Program Files\Dynamo 0.8\ProtoGeometry.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ProtoInterface, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\DynamoVisualProgramming.ZeroTouchLibrary.0.8.2\lib\net40\ProtoInterface.dll</HintPath>
+    <Reference Include="ProtoInterface">
+      <HintPath>C:\Program Files\Dynamo 0.8\ProtoInterface.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPI">
-      <HintPath>..\..\..\..\..\Program Files\Autodesk\Revit 2016\RevitAPI.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\Revit 2016\RevitAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitNodes">
-      <HintPath>..\..\..\..\..\Program Files\Dynamo 0.8\Revit_2016\RevitNodes.dll</HintPath>
+      <HintPath>C:\Program Files\Dynamo 0.8\Revit_2016\RevitNodes.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitServices">
-      <HintPath>..\..\..\..\..\Program Files\Dynamo 0.8\Revit_2016\RevitServices.dll</HintPath>
+      <HintPath>C:\Program Files\Dynamo 0.8\Revit_2016\RevitServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System;
 using DB = Autodesk.Revit.DB;
 using DynamoServices;
 using Autodesk.DesignScript.Runtime;
@@ -12,12 +11,15 @@ using Autodesk.DesignScript.Interfaces;
 using Revit.GeometryConversion;
 using RevitServices.Persistence;
 using RevitServices.Transactions;
-using System.Collections.Generic;
 using Revit.Elements;
 
 namespace DynamoMEP
 {
-    class MEP
+    /// <summary>
+    /// Base class
+    /// </summary>
+    [DynamoServices.RegisterForTrace]
+    public class MEP
     {
         /// <summary>
         /// Retrive all spaces in project

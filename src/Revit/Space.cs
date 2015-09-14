@@ -11,6 +11,9 @@ using System.Collections.Generic;
 
 namespace Revit.Elements
 {
+    /// <summary>
+    /// MEP Spaces
+    /// </summary>
     [DynamoServices.RegisterForTrace]
     public class Space : Element
     {
@@ -40,7 +43,7 @@ namespace Revit.Elements
         /// <summary>
         /// Create from an existing Revit Element
         /// </summary>
-        /// <param name="rebar"></param>
+        /// <param name="space">An existing Revit space</param>
         private Space(DB.Mechanical.Space space)
         {
             SafeInit(() => InitSpace(space));
@@ -61,7 +64,7 @@ namespace Revit.Elements
         /// <summary>
         /// Initialize a Space element
         /// </summary>
-        /// <param name="rebar"></param>
+        /// <param name="room"></param>
         private void InitSpace(DB.Mechanical.Space room)
         {
             InternalSetSpace(room);
@@ -105,7 +108,7 @@ namespace Revit.Elements
         /// <summary>
         /// Set the internal Element, ElementId, and UniqueId
         /// </summary>
-        /// <param name="rebar"></param>
+        /// <param name="space"></param>
         private void InternalSetSpace(DB.Mechanical.Space space)
         {
             InternalSpace = space;
@@ -120,9 +123,8 @@ namespace Revit.Elements
         /// <summary>
         /// Create an element based Tag
         /// </summary>
-        /// <param name="element">Element to tag</param>
-        /// <param name="horizontal">Horizontal alignment</param>
-        /// <param name="addLeader">Add a leader</param>
+        /// <param name="point">Location point for the space</param>
+        /// <param name="level">Level of the space</param>
         /// <returns></returns>
         public static Space ByPointAndLevel(Point point, Level level)
         {
@@ -165,42 +167,7 @@ namespace Revit.Elements
         /// <returns>The string representation of our object.</returns>
         public override string ToString()
         {
-            return string.Format("Space {0} - {1} {2}", InternalSpace.Name, InternalSpace.Number, InternalSpace.Id.IntegerValue);
-        }
-
-        /// <summary>
-        /// The Tessellate method in the IGraphicItem interface allows
-        /// you to specify what is drawn when dynamo's visualization is
-        /// updated.
-        /// </summary>
-        /// <param name="package">The IRenderPackage object into which you push your render data</param>
-        /// <param name="param">Tessellation parameters</param>
-        [IsVisibleInDynamoLibrary(false)]
-        public void Tessellate(IRenderPackage package, TessellationParameters param)
-        {
-            //Location Point
-            DB.LocationPoint locPoint = InternalSpace.Location as DB.LocationPoint;
-            package.AddPointVertex(locPoint.Point.X, locPoint.Point.Y, locPoint.Point.Z);
-            package.AddPointVertexColor(255, 0, 0, 255);
-
-            //Boundaries
-            DB.SpatialElementBoundaryOptions options = new DB.SpatialElementBoundaryOptions();
-            options.SpatialElementBoundaryLocation = DB.SpatialElementBoundaryLocation.Finish;
-            foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(options))
-            {
-                foreach (DB.BoundarySegment segment in segments)
-                {
-                    DB.XYZ endPoint0 = segment.GetCurve().GetEndPoint(0);
-                    DB.XYZ endPoint1 = segment.GetCurve().GetEndPoint(1);
-                    package.AddLineStripVertex(endPoint0.X, endPoint0.Y, endPoint0.Z);
-                    package.AddLineStripVertex(endPoint1.X, endPoint1.Y, endPoint1.Z);
-
-                    package.AddLineStripVertexColor(255, 0, 0, 255);
-                    package.AddLineStripVertexColor(255, 0, 0, 255);
-
-                    package.AddLineStripVertexCount(2);
-                }
-            }
+            return string.Format("Space {1} - {0}", InternalSpace.Name, InternalSpace.Number);
         }
 
         #endregion

@@ -11,6 +11,9 @@ using System.Collections.Generic;
 
 namespace Revit.Elements
 {
+    /// <summary>
+    /// Architectural Rooms
+    /// </summary>
     [DynamoServices.RegisterForTrace]
     public class Room : Element
     {
@@ -40,7 +43,7 @@ namespace Revit.Elements
         /// <summary>
         /// Create from an existing Revit Element
         /// </summary>
-        /// <param name="rebar"></param>
+        /// <param name="room">An existing Revit room</param>
         private Room(DB.Architecture.Room room)
         {
             SafeInit(() => InitRoom(room));
@@ -61,7 +64,7 @@ namespace Revit.Elements
         /// <summary>
         /// Initialize a Rebar element
         /// </summary>
-        /// <param name="rebar"></param>
+        /// <param name="room"></param>
         private void InitRoom(DB.Architecture.Room room)
         {
             InternalSetRoom(room);
@@ -105,12 +108,12 @@ namespace Revit.Elements
         /// <summary>
         /// Set the internal Element, ElementId, and UniqueId
         /// </summary>
-        /// <param name="rebar"></param>
-        private void InternalSetRoom(DB.Architecture.Room tag)
+        /// <param name="room"></param>
+        private void InternalSetRoom(DB.Architecture.Room room)
         {
-            InternalRoom = tag;
-            InternalElementId = tag.Id;
-            InternalUniqueId = tag.UniqueId;
+            InternalRoom = room;
+            InternalElementId = room.Id;
+            InternalUniqueId = room.UniqueId;
         }
 
         #endregion
@@ -120,9 +123,8 @@ namespace Revit.Elements
         /// <summary>
         /// Create an element based Tag
         /// </summary>
-        /// <param name="element">Element to tag</param>
-        /// <param name="horizontal">Horizontal alignment</param>
-        /// <param name="addLeader">Add a leader</param>
+        /// <param name="point">Location point for the room</param>
+        /// <param name="level">Level of the room</param>
         /// <returns></returns>
         public static Room ByPointAndLevel(Point point,Level level)
         {
@@ -165,42 +167,7 @@ namespace Revit.Elements
         /// <returns>The string representation of our object.</returns>
         public override string ToString()
         {
-            return string.Format("Room {0} - {1} {2}", InternalRoom.Name, InternalRoom.Number, InternalRoom.Id.IntegerValue);
-        }
-
-        /// <summary>
-        /// The Tessellate method in the IGraphicItem interface allows
-        /// you to specify what is drawn when dynamo's visualization is
-        /// updated.
-        /// </summary>
-        /// <param name="package">The IRenderPackage object into which you push your render data</param>
-        /// <param name="param">Tessellation parameters</param>
-        [IsVisibleInDynamoLibrary(false)]
-        public void Tessellate(IRenderPackage package, TessellationParameters param)
-        {
-            //Location Point
-            DB.LocationPoint locPoint = InternalRoom.Location as DB.LocationPoint;
-            package.AddPointVertex(locPoint.Point.X, locPoint.Point.Y, locPoint.Point.Z);
-            package.AddPointVertexColor(255, 0, 0, 255);
-
-            //Boundaries
-            DB.SpatialElementBoundaryOptions options = new DB.SpatialElementBoundaryOptions();
-            options.SpatialElementBoundaryLocation = DB.SpatialElementBoundaryLocation.Finish;
-            foreach (List<DB.BoundarySegment> segments in InternalRoom.GetBoundarySegments(options))
-            {
-                foreach (DB.BoundarySegment segment in segments)
-                {
-                    DB.XYZ endPoint0 = segment.GetCurve().GetEndPoint(0);
-                    DB.XYZ endPoint1 = segment.GetCurve().GetEndPoint(1);
-                    package.AddLineStripVertex(endPoint0.X, endPoint0.Y, endPoint0.Z);
-                    package.AddLineStripVertex(endPoint1.X, endPoint1.Y, endPoint1.Z);
-
-                    package.AddLineStripVertexColor(255, 0, 0, 255);
-                    package.AddLineStripVertexColor(255, 0, 0, 255);
-
-                    package.AddLineStripVertexCount(2);
-                }
-            }
+            return string.Format("Room {1} - {0}", InternalRoom.Name, InternalRoom.Number);
         }
 
         #endregion

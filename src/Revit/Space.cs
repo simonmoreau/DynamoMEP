@@ -16,7 +16,7 @@ namespace Revit.Elements
     /// MEP Spaces
     /// </summary>
     [DynamoServices.RegisterForTrace]
-    public class Space : Element
+    public class Space : Element, IGraphicItem
     {
         #region Internal Properties
 
@@ -189,7 +189,7 @@ namespace Revit.Elements
         /// <summary>
         /// Retrive space boundaries
         /// </summary>
-        public List<Element> Boundaries
+        public List<Element> BoundaryElements
         {
             get
             {
@@ -212,6 +212,27 @@ namespace Revit.Elements
             }
         }
 
+        public List<Curve> BoundaryCurves
+        {
+            get
+            {
+                List<Curve> output = new List<Curve>();
+                DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
+                DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
+
+                foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(opt))
+                {
+                    foreach (DB.BoundarySegment segment in segments)
+                    {
+                        DB.Curve curve = segment.GetCurve();
+                        //output.Add(ElementWrapper.ToDSType(curve, true));
+                    }
+
+                }
+                output = output.Distinct().ToList();
+                return output;
+            }
+        }
         
 
 
@@ -236,6 +257,33 @@ namespace Revit.Elements
         #endregion
 
         #region Display Functions
+
+        [IsVisibleInDynamoLibrary(false)]
+        public new void Tessellate(IRenderPackage package, TessellationParameters parameters)
+        {
+            //Ensure that the object is still alive
+            if (!IsAlive) return;
+
+            //this.Curve.Tessellate(package, parameters);
+
+            if (package.LineVertexCount > 0)
+            {
+                //package.ApplyLineVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, DefR, DefG, DefB, DefA));
+            }
+        }
+
+        private static byte[] CreateColorByteArrayOfSize(int size, byte red, byte green, byte blue, byte alpha)
+        {
+            var arr = new byte[size * 4];
+            for (var i = 0; i < arr.Length; i += 4)
+            {
+                arr[i] = red;
+                arr[i + 1] = green;
+                arr[i + 2] = blue;
+                arr[i + 3] = alpha;
+            }
+            return arr;
+        }
 
         /// <summary>
         /// OPTIONAL:

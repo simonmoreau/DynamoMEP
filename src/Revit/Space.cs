@@ -187,7 +187,7 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Retrive space boundaries
+        /// Retrive space boundary elements
         /// </summary>
         public List<Element> BoundaryElements
         {
@@ -212,25 +212,16 @@ namespace Revit.Elements
             }
         }
 
+        private List<Curve> _boundaryCurves = new List<Curve>();
+
+        /// <summary>
+        /// Retrive space boundary curves
+        /// </summary>
         public List<Curve> BoundaryCurves
         {
             get
             {
-                List<Curve> output = new List<Curve>();
-                DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
-                DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
-
-                foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(opt))
-                {
-                    foreach (DB.BoundarySegment segment in segments)
-                    {
-                        DB.Curve curve = segment.GetCurve();
-                        //output.Add(ElementWrapper.ToDSType(curve, true));
-                    }
-
-                }
-                output = output.Distinct().ToList();
-                return output;
+                return _boundaryCurves;
             }
         }
         
@@ -258,17 +249,40 @@ namespace Revit.Elements
 
         #region Display Functions
 
+        /// <summary>
+        /// Display Spaces in the Dynamo interface
+        /// </summary>
+        /// <param name="package"></param>
+        /// <param name="parameters"></param>
         [IsVisibleInDynamoLibrary(false)]
         public new void Tessellate(IRenderPackage package, TessellationParameters parameters)
         {
             //Ensure that the object is still alive
             if (!IsAlive) return;
 
-            //this.Curve.Tessellate(package, parameters);
+            //Location Point
+            DB.LocationPoint locPoint = InternalElement.Location as DB.LocationPoint;
+            package.AddPointVertex(locPoint.Point.X, locPoint.Point.Y, locPoint.Point.Z);
+            package.AddPointVertexColor(255, 0, 0, 255);
 
-            if (package.LineVertexCount > 0)
+            //Boundaries
+            DB.SpatialElementBoundaryOptions options = new DB.SpatialElementBoundaryOptions();
+            options.SpatialElementBoundaryLocation = DB.SpatialElementBoundaryLocation.Finish;
+            foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(options))
             {
-                //package.ApplyLineVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, DefR, DefG, DefB, DefA));
+                foreach (DB.BoundarySegment segment in segments)
+                {
+                    Curve crv = RevitToProtoCurve.ToProtoType(segment.GetCurve());
+
+                    crv.Tessellate(package, parameters);
+                    
+                    _boundaryCurves.Add(crv);
+
+                    if (package.LineVertexCount > 0)
+                    {
+                        package.ApplyLineVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, 255, 0, 0, 0));
+                    }
+                }
             }
         }
 

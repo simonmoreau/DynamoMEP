@@ -13,6 +13,9 @@ using System.Linq;
 
 namespace Revit.Elements
 {
+    /// <summary>
+    /// Test
+    /// </summary>
     [IsVisibleInDynamoLibrary(false)]
     public static class RevitUtilities
     {

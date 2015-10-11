@@ -16,7 +16,7 @@ namespace Revit.Elements
     /// MEP Spaces
     /// </summary>
     [DynamoServices.RegisterForTrace]
-    public class Space : Element, IGraphicItem
+    public class Space : Element
     {
         #region Internal Properties
 
@@ -25,6 +25,7 @@ namespace Revit.Elements
         /// </summary>
         internal DB.Mechanical.Space InternalSpace
         {
+
             get;
             private set;
         }
@@ -36,6 +37,8 @@ namespace Revit.Elements
         {
             get { return InternalSpace; }
         }
+
+        internal List<DB.BoundarySegment> InternalBoundarySegments = new List<DB.BoundarySegment>();
 
         #endregion
 
@@ -115,6 +118,24 @@ namespace Revit.Elements
             InternalSpace = space;
             InternalElementId = space.Id;
             InternalUniqueId = space.UniqueId;
+            GetBoundarySegment();
+        }
+
+        private void GetBoundarySegment()
+        {
+            List<DB.BoundarySegment> output = new List<DB.BoundarySegment>();
+            DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
+            DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
+
+            foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(opt))
+            {
+                foreach (DB.BoundarySegment segment in segments)
+                {
+                    output.Add(segment);
+                }
+            }
+
+            InternalBoundarySegments = output.Distinct().ToList();
         }
 
         #endregion
@@ -195,18 +216,13 @@ namespace Revit.Elements
             {
                 List<Element> output = new List<Element>();
                 DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
-                DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
-                
-                foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(opt))
-                {
-                    foreach (DB.BoundarySegment segment in segments)
-                    {
-                        DB.Element boundaryElement = doc.GetElement(segment.ElementId);
 
-                        output.Add(ElementWrapper.ToDSType(boundaryElement, true));
-                    }
-                    
+                foreach (DB.BoundarySegment segment in InternalBoundarySegments)
+                {
+                    DB.Element boundaryElement = doc.GetElement(segment.ElementId);
+                    output.Add(ElementWrapper.ToDSType(boundaryElement, true));
                 }
+
                 output = output.Distinct().ToList();
                 return output;
             }
@@ -262,26 +278,20 @@ namespace Revit.Elements
 
             //Location Point
             DB.LocationPoint locPoint = InternalElement.Location as DB.LocationPoint;
-            package.AddPointVertex(locPoint.Point.X, locPoint.Point.Y, locPoint.Point.Z);
-            package.AddPointVertexColor(255, 0, 0, 255);
+            GeometryPrimitiveConverter.ToPoint(locPoint.Point).Tessellate(package, parameters);
+            package.ApplyPointVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, 255, 0, 0, 0));
 
             //Boundaries
-            DB.SpatialElementBoundaryOptions options = new DB.SpatialElementBoundaryOptions();
-            options.SpatialElementBoundaryLocation = DB.SpatialElementBoundaryLocation.Finish;
-            foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(options))
+            foreach (DB.BoundarySegment segment in InternalBoundarySegments)
             {
-                foreach (DB.BoundarySegment segment in segments)
+                Curve crv = RevitToProtoCurve.ToProtoType(segment.GetCurve());
+
+                _boundaryCurves.Add(crv);
+                crv.Tessellate(package, parameters);
+
+                if (package.LineVertexCount > 0)
                 {
-                    Curve crv = RevitToProtoCurve.ToProtoType(segment.GetCurve());
-
-                    crv.Tessellate(package, parameters);
-                    
-                    _boundaryCurves.Add(crv);
-
-                    if (package.LineVertexCount > 0)
-                    {
-                        package.ApplyLineVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, 255, 0, 0, 0));
-                    }
+                    package.ApplyLineVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, 255, 0, 0, 0));
                 }
             }
         }

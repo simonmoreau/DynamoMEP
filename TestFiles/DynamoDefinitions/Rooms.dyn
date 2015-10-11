@@ -1,0 +1,20 @@
+<Workspace Version="0.9.0.2805" X="107.393547086826" Y="90.1972720207531" zoom="0.666867678415087" Name="Home" Description="" RunType="Automatic" RunPeriod="1000" HasRunWithoutCrash="True">
+  <NamespaceResolutionMap />
+  <Elements>
+    <DSRevitNodesUI.Categories guid="895a3168-c386-49b0-b7ff-5a95efee7328" type="DSRevitNodesUI.Categories" nickname="Categories" x="63" y="193" isVisible="true" isUpstreamVisible="true" lacing="Disabled" isSelectedInput="True" index="726:Rooms" />
+    <DSRevitNodesUI.ElementsOfCategory guid="4523ee1a-1e1a-4e04-8862-b5b164ede9c7" type="DSRevitNodesUI.ElementsOfCategory" nickname="All Elements of Category" x="279" y="200" isVisible="true" isUpstreamVisible="true" lacing="Disabled" isSelectedInput="False" />
+    <Dynamo.Nodes.DSFunction guid="df3c9fc6-bc88-4612-8b9c-31b4c15b924b" type="Dynamo.Nodes.DSFunction" nickname="Room.FromElement" x="544.789332107643" y="235.368265318407" isVisible="true" isUpstreamVisible="true" lacing="Shortest" isSelectedInput="False" assembly="..\..\src\bin\Debug\DynamoMEP.dll" function="Revit.Elements.Room.FromElement@Revit.Elements.Element" />
+    <Dynamo.Nodes.DSFunction guid="b8d3f42f-71f8-4b57-bb39-ec57bc716edc" type="Dynamo.Nodes.DSFunction" nickname="Room.Doors" x="747.684239395419" y="248.62912590591" isVisible="true" isUpstreamVisible="true" lacing="Shortest" isSelectedInput="False" assembly="..\..\src\bin\Debug\DynamoMEP.dll" function="Revit.Elements.Room.Doors" />
+  </Elements>
+  <Connectors>
+    <Dynamo.Models.ConnectorModel start="895a3168-c386-49b0-b7ff-5a95efee7328" start_index="0" end="4523ee1a-1e1a-4e04-8862-b5b164ede9c7" end_index="0" portType="0" />
+    <Dynamo.Models.ConnectorModel start="4523ee1a-1e1a-4e04-8862-b5b164ede9c7" start_index="0" end="df3c9fc6-bc88-4612-8b9c-31b4c15b924b" end_index="0" portType="0" />
+    <Dynamo.Models.ConnectorModel start="df3c9fc6-bc88-4612-8b9c-31b4c15b924b" start_index="0" end="b8d3f42f-71f8-4b57-bb39-ec57bc716edc" end_index="0" portType="0" />
+  </Connectors>
+  <Notes />
+  <Annotations />
+  <Presets />
+  <Cameras>
+    <Camera Name="Background Preview" eyeX="0.15760310119825" eyeY="98.7532840848794" eyeZ="4.26308318704382" lookX="-5.15760310119825" lookY="-87.7532840848794" lookZ="-12.2630831870438" upX="-0.36193664465393" upY="0.358367949545301" upZ="-0.8605662542741" />
+  </Cameras>
+</Workspace>

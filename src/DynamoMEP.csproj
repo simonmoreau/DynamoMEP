@@ -35,15 +35,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DynamoServices">
-      <HintPath>C:\Program Files\Dynamo 0.8\DynamoServices.dll</HintPath>
+      <HintPath>C:\Program Files\Dynamo 0.9\DynamoServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ProtoGeometry">
-      <HintPath>C:\Program Files\Dynamo 0.8\ProtoGeometry.dll</HintPath>
+      <HintPath>C:\Program Files\Dynamo 0.9\ProtoGeometry.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ProtoInterface">
-      <HintPath>C:\Program Files\Dynamo 0.8\ProtoInterface.dll</HintPath>
+      <HintPath>C:\Program Files\Dynamo 0.9\ProtoInterface.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPI">
@@ -51,11 +51,11 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitNodes">
-      <HintPath>C:\Program Files\Dynamo 0.8\Revit_2016\RevitNodes.dll</HintPath>
+      <HintPath>C:\Program Files\Dynamo 0.9\Revit_2016\RevitNodes.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitServices">
-      <HintPath>C:\Program Files\Dynamo 0.8\Revit_2016\RevitServices.dll</HintPath>
+      <HintPath>C:\Program Files\Dynamo 0.9\Revit_2016\RevitServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />

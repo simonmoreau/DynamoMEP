@@ -37,6 +37,15 @@ namespace Revit.Elements
             get { return InternalRoom; }
         }
 
+        /// <summary>
+        /// Transform of the Element
+        /// </summary>
+        internal DB.Transform InternalTransform
+        {
+            get;
+            private set;
+        }
+
         internal List<DB.BoundarySegment> InternalBoundarySegments = new List<DB.BoundarySegment>();
 
         #endregion
@@ -46,10 +55,10 @@ namespace Revit.Elements
         /// <summary>
         /// Create from an existing Revit Element
         /// </summary>
-        /// <param name="space">An existing Revit room</param>
-        private Room(DB.Architecture.Room space)
+        /// <param name="room">An existing Revit room</param>
+        private Room(DB.Architecture.Room room)
         {
-            SafeInit(() => InitSpace(space));
+            SafeInit(() => InitRoom(room));
         }
 
 
@@ -57,7 +66,7 @@ namespace Revit.Elements
             DB.Level level,
             DB.UV point)
         {
-            SafeInit(() => InitSpace(level, point));
+            SafeInit(() => InitRoom(level, point));
         }
 
         #endregion
@@ -68,13 +77,13 @@ namespace Revit.Elements
         /// Initialize a Room element
         /// </summary>
         /// <param name="room"></param>
-        private void InitSpace(DB.Architecture.Room room)
+        private void InitRoom(DB.Architecture.Room room)
         {
-            InternalSetSpace(room);
+            InternalSetRoom(room);
         }
 
 
-        private void InitSpace(DB.Level level, DB.UV point)
+        private void InitRoom(DB.Level level, DB.UV point)
         {
             DB.Document document = DocumentManager.Instance.CurrentDBDocument;
 
@@ -87,7 +96,7 @@ namespace Revit.Elements
             if (roomElem == null)
                 roomElem = document.Create.NewRoom(level, point);
 
-            InternalSetSpace(roomElem);
+            InternalSetRoom(roomElem);
 
             TransactionManager.Instance.TransactionTaskDone();
 
@@ -108,19 +117,45 @@ namespace Revit.Elements
         /// <summary>
         /// Set the internal Element, ElementId, and UniqueId
         /// </summary>
-        /// <param name="space"></param>
-        private void InternalSetSpace(DB.Architecture.Room space)
+        /// <param name="room"></param>
+        private void InternalSetRoom(DB.Architecture.Room room)
         {
-            InternalRoom = space;
-            InternalElementId = space.Id;
-            InternalUniqueId = space.UniqueId;
-            GetBoundarySegment();
+            InternalRoom = room;
+            InternalElementId = room.Id;
+            InternalUniqueId = room.UniqueId;
+            InternalBoundarySegments = GetBoundarySegment();
+            InternalTransform = GetTransform();
         }
 
-        private void GetBoundarySegment()
+        private DB.Transform GetTransform()
+        {
+            if (InternalElement.Document.GetHashCode() == DocumentManager.Instance.CurrentDBDocument.GetHashCode())
+            {
+                return DB.Transform.Identity;
+            }
+            else
+            {
+                //Find the revit instance where we find the room
+                DB.FilteredElementCollector collector = new DB.FilteredElementCollector(DocumentManager.Instance.CurrentDBDocument);
+                List<DB.RevitLinkInstance> linkInstances = collector.OfCategory(DB.BuiltInCategory.OST_RvtLinks).WhereElementIsNotElementType().ToElements().Cast<DB.RevitLinkInstance>().ToList();
+                DB.RevitLinkInstance roomLinkInstance = linkInstances.FirstOrDefault();
+                
+                foreach (DB.RevitLinkInstance linkInstance in linkInstances)
+                {
+                    if (linkInstance.GetLinkDocument().GetHashCode() == InternalElement.Document.GetHashCode())
+                    {
+                        roomLinkInstance = linkInstance;
+                        break;
+                    }
+                }
+
+                return roomLinkInstance.GetTotalTransform();
+            }
+        }
+
+        private List<DB.BoundarySegment> GetBoundarySegment()
         {
             List<DB.BoundarySegment> output = new List<DB.BoundarySegment>();
-            DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
             DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
 
             foreach (List<DB.BoundarySegment> segments in InternalRoom.GetBoundarySegments(opt))
@@ -131,7 +166,7 @@ namespace Revit.Elements
                 }
             }
 
-            InternalBoundarySegments = output.Distinct().ToList();
+             return output.Distinct().ToList();
         }
 
         #endregion
@@ -148,10 +183,55 @@ namespace Revit.Elements
         public static Room ByPointAndLevel(Point point, Level level)
         {
             DB.Level revitLevel = level.InternalElement as DB.Level;
+            DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
 
-            DB.UV uv = new DB.UV(point.X, point.Y);
+            DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
 
             return new Room(revitLevel, uv);
+        }
+
+        /// <summary>
+        /// Create a Room
+        /// based on a location
+        /// </summary>
+        /// <param name="point">Location point for the room</param>
+        /// <returns></returns>
+        public static Room ByPoint(Point point)
+        {
+            DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
+            DB.Level revitLevel = GetNearestLevel(revitPoint);
+
+            DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
+
+            return new Room(revitLevel, uv);
+        }
+
+        /// <summary>
+        /// Find the nearest level in the active document
+        /// </summary>
+        /// <param name="point">The reference point</param>
+        /// <returns></returns>
+        private static DB.Level GetNearestLevel(DB.XYZ point)
+        {
+            //find all level in the active document
+            DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
+
+            DB.FilteredElementCollector collector = new DB.FilteredElementCollector(doc);
+            List<DB.Level> activeLevels = collector.OfCategory(DB.BuiltInCategory.OST_Levels).WhereElementIsNotElementType().ToElements().Cast<DB.Level>().ToList();
+
+            DB.Level nearestLevel = activeLevels.FirstOrDefault();
+            double delta = Math.Abs(nearestLevel.ProjectElevation - point.Z);
+
+            foreach (DB.Level currentLevel in activeLevels)
+            {
+                if (Math.Abs(currentLevel.ProjectElevation - point.Z) < delta)
+                {
+                    nearestLevel = currentLevel;
+                    delta = Math.Abs(currentLevel.ProjectElevation - point.Z);
+                }
+            }
+
+            return nearestLevel;
         }
 
         /// <summary>
@@ -162,13 +242,20 @@ namespace Revit.Elements
         /// <returns></returns>
         public static Room FromElement(Element element)
         {
-            if (element.InternalElement.GetType() == typeof(DB.Architecture.Room))
+            if (element != null)
             {
-                return new Room(element.InternalElement as DB.Architecture.Room);
+                if (element.InternalElement.GetType() == typeof(DB.Architecture.Room))
+                {
+                    return new Room(element.InternalElement as DB.Architecture.Room);
+                }
+                else
+                {
+                    throw new ArgumentException("The Element is not a Room");
+                }
             }
             else
             {
-                throw new ArgumentException("The Element is not a Room");
+                throw new ArgumentException("An error occured");
             }
         }
 
@@ -183,7 +270,7 @@ namespace Revit.Elements
         /// <returns name="Name">The Room Name</returns>
         /// <returns name="Number">The Room Number</returns>
         [MultiReturn(new[] { "Name", "Number" })]
-        public Dictionary<string, string> IdentificationData()
+        public Dictionary<string, string> GetIdentificationData()
         {
             return new Dictionary<string, string>()
                 {
@@ -200,12 +287,21 @@ namespace Revit.Elements
             get
             {
                 List<Element> output = new List<Element>();
-                DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
+                DB.Document doc = InternalElement.Document;
 
                 foreach (DB.BoundarySegment segment in InternalBoundarySegments)
                 {
                     DB.Element boundaryElement = doc.GetElement(segment.ElementId);
-                    output.Add(ElementWrapper.ToDSType(boundaryElement, true));
+                    if (boundaryElement.GetType() == typeof(DB.RevitLinkInstance))
+                    {
+                        DB.RevitLinkInstance linkInstance = boundaryElement as DB.RevitLinkInstance;
+                        DB.Element linkBoundaryElement = linkInstance.GetLinkDocument().GetElement(segment.LinkElementId);
+                        output.Add(ElementWrapper.ToDSType(linkBoundaryElement, true));
+                    }
+                    else
+                    {
+                        output.Add(ElementWrapper.ToDSType(boundaryElement, true));
+                    }
                 }
 
                 output = output.Distinct().ToList();
@@ -214,53 +310,113 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Retrive Windows around the room
+        /// Retrive the room associated level
         /// </summary>
-        public List<FamilyInstance> Windows
+        public Level Level
         {
             get
             {
+                DB.Document doc = InternalElement.Document;
+                DB.Element roomLevel = doc.GetElement(InternalElement.LevelId);
+
+                return ElementWrapper.ToDSType(roomLevel, true) as Level;
+            }
+        }
+
+        /// <summary>
+        /// Retrive the room location
+        /// </summary>
+        public Point LocationPoint
+        {
+            get
+            {
+                DB.LocationPoint locPoint = InternalElement.Location as DB.LocationPoint;
+                return GeometryPrimitiveConverter.ToPoint(InternalTransform.OfPoint(locPoint.Point));
+            }
+        }
+
+        /// <summary>
+        /// Retrive family instance hosted in boundary elements
+        /// This is the base function for Windows and Doors
+        /// </summary>
+        /// <param name="cat">The category of hosted elements</param>
+        /// <returns></returns>
+        private List<FamilyInstance> BoundaryFamilyInstance(DB.BuiltInCategory cat)
+        {
                 List<FamilyInstance> output = new List<FamilyInstance>();
-                DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
 
-                // Find all Door instances in the document by using category filter
-                DB.ElementCategoryFilter filter = new DB.ElementCategoryFilter(DB.BuiltInCategory.OST_Windows);
+                //the document of the room
+                DB.Document doc = InternalElement.Document; // DocumentManager.Instance.CurrentDBDocument;
 
-                // Apply the filter to the elements in the active document,
-                // Use shortcut WhereElementIsNotElementType() to find doors instances
-                DB.FilteredElementCollector collector = new DB.FilteredElementCollector(doc);
-                IList<DB.FamilyInstance> windows = collector.WherePasses(filter).WhereElementIsNotElementType().ToElements().Cast<DB.FamilyInstance>().ToList();
-
-                Dictionary<DB.ElementId, DB.FamilyInstance> boundaryWindows = windows.ToDictionary(x => x.Host.Id, x => x);
+                //Find boundary elements and their associated document
+                List<DB.ElementId> boundaryElements = new List<DB.ElementId>();
+                List<DB.Document> boundaryDocuments = new List<DB.Document>();
 
                 foreach (DB.BoundarySegment segment in InternalBoundarySegments)
                 {
-                    if (boundaryWindows.ContainsKey(segment.ElementId))
+                    DB.Element boundaryElement = doc.GetElement(segment.ElementId);
+                    if (boundaryElement.GetType() == typeof(DB.RevitLinkInstance))
                     {
-                        DB.FamilyInstance boundaryWindow = boundaryWindows[segment.ElementId];
-                        DB.Phase windowPhase = doc.GetElement(boundaryWindow.CreatedPhaseId) as DB.Phase;
-                        if (boundaryWindow.get_FromRoom(windowPhase) != null)
-                        {
-                            if (boundaryWindow.get_FromRoom(windowPhase).Id == InternalRoom.Id)
-                            {
-                                output.Add(ElementWrapper.ToDSType(boundaryWindow, true) as FamilyInstance);
-                                continue;
-                            }
-                        }
+                        DB.RevitLinkInstance linkInstance = boundaryElement as DB.RevitLinkInstance;
+                        boundaryDocuments.Add(linkInstance.GetLinkDocument());
+                        boundaryElements.Add(segment.LinkElementId);
+                    }
+                    else
+                    {
+                        boundaryDocuments.Add(doc);
+                        boundaryElements.Add(segment.ElementId);
+                    }
+                }
 
-                        if (boundaryWindow.get_ToRoom(windowPhase) != null)
-                        {
-                            if (boundaryWindow.get_ToRoom(windowPhase).Id == InternalRoom.Id)
-                            {
-                                output.Add(ElementWrapper.ToDSType(boundaryWindow, true) as FamilyInstance);
-                            }
-                        }
+                // Create a category filter
+                DB.ElementCategoryFilter filter = new DB.ElementCategoryFilter(cat);
+                // Apply the filter to the elements in these documents,
+                // Use shortcut WhereElementIsNotElementType() to find family instances in all boundary documents
+                boundaryDocuments = boundaryDocuments.Distinct().ToList();
+                List<DB.FamilyInstance> familyInstances = new List<DB.FamilyInstance>();
+                foreach (DB.Document boundaryDocument in boundaryDocuments)
+                {
+                    DB.FilteredElementCollector collector = new DB.FilteredElementCollector(boundaryDocument);
+                    familyInstances.AddRange(collector.WherePasses(filter).WhereElementIsNotElementType().ToElements().Cast<DB.FamilyInstance>().ToList());
+                }
 
+                //Find all family instance hosted on a boundary element
+                IEnumerable<DB.FamilyInstance> boundaryFamilyInstances = familyInstances.Where(s => boundaryElements.Contains(s.Host.Id));
+
+                //loop on these boundary family instance to find to and from room
+                foreach (DB.FamilyInstance boundaryFamilyInstance in boundaryFamilyInstances)
+                {
+                    DB.Phase familyInstancePhase = boundaryFamilyInstance.Document.GetElement(boundaryFamilyInstance.CreatedPhaseId) as DB.Phase;
+                    if (boundaryFamilyInstance.get_FromRoom(familyInstancePhase) != null)
+                    {
+                        if (boundaryFamilyInstance.get_FromRoom(familyInstancePhase).Id == InternalRoom.Id)
+                        {
+                            output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as FamilyInstance);
+                            continue;
+                        }
+                    }
+
+                    if (boundaryFamilyInstance.get_ToRoom(familyInstancePhase) != null)
+                    {
+                        if (boundaryFamilyInstance.get_ToRoom(familyInstancePhase).Id == InternalRoom.Id)
+                        {
+                            output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as FamilyInstance);
+                        }
                     }
                 }
 
                 output = output.Distinct().ToList();
                 return output;
+        }
+
+        /// <summary>
+        /// Retrive windows around the room
+        /// </summary>
+        public List<FamilyInstance> Windows
+        {
+            get
+            {
+                return BoundaryFamilyInstance(DB.BuiltInCategory.OST_Windows);
             }
         }
 
@@ -271,64 +427,9 @@ namespace Revit.Elements
         {
             get
             {
-                List<FamilyInstance> output = new List<FamilyInstance>();
-                DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
-
-                // Find all Door instances in the document by using category filter
-                DB.ElementCategoryFilter filter = new DB.ElementCategoryFilter(DB.BuiltInCategory.OST_Doors);
-
-                // Apply the filter to the elements in the active document,
-                // Use shortcut WhereElementIsNotElementType() to find doors instances
-                DB.FilteredElementCollector collector = new DB.FilteredElementCollector(doc);
-                IList<DB.FamilyInstance> doors = collector.WherePasses(filter).WhereElementIsNotElementType().ToElements().Cast<DB.FamilyInstance>().ToList();
-
-                Dictionary<DB.ElementId, DB.FamilyInstance> boundaryDoors = doors.ToDictionary(x => x.Host.Id, x => x);
-
-                foreach (DB.BoundarySegment segment in InternalBoundarySegments)
-                {
-                    if (boundaryDoors.ContainsKey(segment.ElementId))
-                    {
-                        DB.FamilyInstance boundaryDoor = boundaryDoors[segment.ElementId];
-                        DB.Phase doorPhase = doc.GetElement(boundaryDoor.CreatedPhaseId) as DB.Phase;
-                        if (boundaryDoor.get_FromRoom(doorPhase) != null)
-                        {
-                            if (boundaryDoor.get_FromRoom(doorPhase).Id == InternalRoom.Id)
-                            {
-                                output.Add(ElementWrapper.ToDSType(boundaryDoor, true) as FamilyInstance);
-                                continue;
-                            }
-                        }
-
-                        if (boundaryDoor.get_ToRoom(doorPhase) != null)
-                        {
-                            if (boundaryDoor.get_ToRoom(doorPhase).Id == InternalRoom.Id)
-                            {
-                                output.Add(ElementWrapper.ToDSType(boundaryDoor, true) as FamilyInstance);
-                            }
-                        }
-
-                    }
-                }
-
-                output = output.Distinct().ToList();
-                return output;
+                return BoundaryFamilyInstance(DB.BuiltInCategory.OST_Doors);
             }
         }
-
-        private List<Curve> _boundaryCurves = new List<Curve>();
-
-        /// <summary>
-        /// Retrive space boundary curves
-        /// </summary>
-        public List<Curve> BoundaryCurves
-        {
-            get
-            {
-                return _boundaryCurves;
-            }
-        }
-
-
 
         #endregion
 
@@ -365,14 +466,14 @@ namespace Revit.Elements
 
             //Location Point
             DB.LocationPoint locPoint = InternalElement.Location as DB.LocationPoint;
-            GeometryPrimitiveConverter.ToPoint(locPoint.Point).Tessellate(package, parameters);
+            GeometryPrimitiveConverter.ToPoint(InternalTransform.OfPoint(locPoint.Point)).Tessellate(package, parameters);
             package.ApplyPointVertexColors(CreateColorByteArrayOfSize(package.PointVertexCount, 255, 0, 0, 0));
 
             //Boundaries
             foreach (DB.BoundarySegment segment in InternalBoundarySegments)
             {
-                Curve crv = RevitToProtoCurve.ToProtoType(segment.GetCurve());
-                _boundaryCurves.Add(crv);
+                Curve crv = RevitToProtoCurve.ToProtoType(segment.GetCurve().CreateTransformed(InternalTransform));
+
                 crv.Tessellate(package, parameters);
 
                 if (package.LineVertexCount > 0)

@@ -4,7 +4,7 @@ DynamoMEP is a Dynamo package for working with MEP elements in Revit 2016 and Dy
 
 DynamoMEP is an Open-Source project available on github and Dynamo’s package manager. The package only contains nodes from creating room and MEP Spaces, and will be improved over time.
 
-The project is being developed in C# using Visual Studio, and will work with Dynamo 0.8.0, and Revit 2016. The project consists of a zero-touch library containing the nodes.
+The project is being developed in C# using Visual Studio, and will work with Dynamo 0.9.0, and Revit 2016. The project consists of a zero-touch library containing the nodes.
 
 ##Nodes
 

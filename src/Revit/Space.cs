@@ -269,7 +269,7 @@ namespace Revit.Elements
         /// <returns name="Room Name">The associated room Name</returns>
         /// <returns name="Room Number">The associated room Number</returns>
         [MultiReturn(new[] { "Name", "Number", "Room Number", "Room Name" })]
-        public Dictionary<string, string> IdentificationData()
+        public Dictionary<string, string> GetIdentificationData()
         {
             string roomName = "Unoccupied";
             string roomNumber = "Unoccupied";

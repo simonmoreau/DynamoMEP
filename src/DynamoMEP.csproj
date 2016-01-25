@@ -73,7 +73,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Revit\Group.cs" />
-    <Compile Include="Revit\RevitUtilities.cs" />
+    <Compile Include="Revit\GroupType.cs" />
     <Compile Include="Revit\Space.cs" />
     <Compile Include="Revit\Room.cs" />
   </ItemGroup>

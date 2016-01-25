@@ -14,17 +14,17 @@ using System.Linq;
 namespace Revit.Elements
 {
     /// <summary>
-    /// Revit Group
+    /// Revit GroupType
     /// </summary>
     [DynamoServices.RegisterForTrace]
-    public class Group : Element, IGraphicItem
+    public class GroupType : Element, IGraphicItem
     {
         #region Internal Properties
 
         /// <summary>
         /// Internal reference to the Revit Element
         /// </summary>
-        internal DB.Group InternalGroup
+        internal DB.GroupType InternalGroupType
         {
             get;
             private set;
@@ -35,7 +35,7 @@ namespace Revit.Elements
         /// </summary>
         public override DB.Element InternalElement
         {
-            get { return InternalGroup; }
+            get { return InternalGroupType; }
         }
 
         #endregion
@@ -45,15 +45,20 @@ namespace Revit.Elements
         /// <summary>
         /// Create from an existing Revit Element
         /// </summary>
-        /// <param name="group">An existing Revit Group</param>
-        private Group(DB.Group group)
+        /// <param name="GroupType">An existing Revit GroupType</param>
+        private GroupType(DB.GroupType GroupType)
         {
-            SafeInit(() => InitGroup(group));
+            SafeInit(() => InitGroupType(GroupType));
         }
 
-        private Group(DB.XYZ point, DB.GroupType groupType)
+        private GroupType(ICollection<DB.ElementId> ids)
         {
-            SafeInit(() => InitGroup(point,groupType));
+            SafeInit(() => InitGroupType(ids));
+        }
+
+        private GroupType(ICollection<DB.ElementId> ids, string name)
+        {
+            SafeInit(() => InitGroupType(ids, name));
         }
 
         #endregion
@@ -61,20 +66,19 @@ namespace Revit.Elements
         #region Helpers for private constructors
 
         /// <summary>
-        /// Initialize a group element
+        /// Initialize a GroupType element
         /// </summary>
-        /// <param name="group">An existing Revit Group</param>
-        private void InitGroup(DB.Group group)
+        /// <param name="GroupType">An existing Revit GroupType</param>
+        private void InitGroupType(DB.GroupType GroupType)
         {
-            InternalSetGroup(group);
+            InternalSetGroupType(GroupType);
         }
 
         /// <summary>
-        /// Place a Group in the model
+        /// Initialize a GroupType element from a set of objects ids
         /// </summary>
-        /// <param name="point">The group instance location</param>
-        /// <param name="GroupType">The type of the group</param>
-        private void InitGroup(DB.XYZ point,DB.GroupType groupType)
+        /// <param name="ids"></param>
+        private void InitGroupType(ICollection<DB.ElementId> ids)
         {
             DB.Document document = DocumentManager.Instance.CurrentDBDocument;
             
@@ -82,16 +86,16 @@ namespace Revit.Elements
             TransactionManager.Instance.EnsureInTransaction(document);
 
             //Phase 1 - Check to see if the object exists and should be rebound
-            var groupElem = ElementBinder.GetElementFromTrace<DB.Group>(document);
+            var GroupTypeElem = ElementBinder.GetElementFromTrace<DB.GroupType>(document);
 
-            if (groupElem == null)
-                groupElem = document.Create.PlaceGroup(point, groupType);
+            if (GroupTypeElem == null)
+                GroupTypeElem = document.Create.NewGroup(ids).GroupType;
 
-            InternalSetGroup(groupElem);
+            InternalSetGroupType(GroupTypeElem);
 
             TransactionManager.Instance.TransactionTaskDone();
 
-            if (groupElem != null)
+            if (GroupTypeElem != null)
             {
                 ElementBinder.CleanupAndSetElementForTrace(document, this.InternalElement);
             }
@@ -102,6 +106,82 @@ namespace Revit.Elements
 
         }
 
+        /// <summary>
+        /// Initialize a GroupType element from a set of objects ids and a name
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <param name="name"></param>
+        private void InitGroupType(ICollection<DB.ElementId> ids, string name)
+        {
+            DB.Document document = DocumentManager.Instance.CurrentDBDocument;
+
+            //Find all groupType name in the document
+            DB.FilteredElementCollector collector = new DB.FilteredElementCollector(document);
+            List<string> groupTypeNames = collector.OfClass(typeof(DB.GroupType)).ToElements().Select(element => element.Name).ToList();
+
+            // This creates a new wall and deletes the old one
+            TransactionManager.Instance.EnsureInTransaction(document);
+
+            //Phase 1 - Check to see if the object exists and should be rebound
+            var GroupTypeElem = ElementBinder.GetElementFromTrace<DB.GroupType>(document);
+
+            if (GroupTypeElem == null)
+            {
+                GroupTypeElem = document.Create.NewGroup(ids).GroupType;
+                if (!groupTypeNames.Contains(name))
+                {
+                    GroupTypeElem.Name = name;
+                }
+                else
+                {
+                    GetNextFilename(name + " {0}", groupTypeNames);
+                }
+            }
+
+            InternalSetGroupType(GroupTypeElem);
+
+            TransactionManager.Instance.TransactionTaskDone();
+
+            if (GroupTypeElem != null)
+            {
+                ElementBinder.CleanupAndSetElementForTrace(document, this.InternalElement);
+            }
+            else
+            {
+                ElementBinder.SetElementForTrace(this.InternalElement);
+            }
+
+        }
+
+        private static string GetNextFilename(string pattern, List<string> names)
+        {
+            string tmp = string.Format(pattern, 1);
+            if (tmp == pattern)
+                throw new ArgumentException("The pattern must include an index place-holder", "pattern");
+
+            if (!names.Contains(tmp))
+                return tmp; // short-circuit if no matches
+
+            int min = 1, max = 2; // min is inclusive, max is exclusive/untested
+
+            while (names.Contains(string.Format(pattern, max)))
+            {
+                min = max;
+                max *= 2;
+            }
+
+            while (max != min + 1)
+            {
+                int pivot = (max + min) / 2;
+                if (names.Contains(string.Format(pattern, pivot)))
+                    min = pivot;
+                else
+                    max = pivot;
+            }
+
+            return string.Format(pattern, max);
+        }
+
         #endregion
 
         #region Private mutators
@@ -109,12 +189,12 @@ namespace Revit.Elements
         /// <summary>
         /// Set the internal Element, ElementId, and UniqueId
         /// </summary>
-        /// <param name="group"></param>
-        private void InternalSetGroup(DB.Group group)
+        /// <param name="GroupType"></param>
+        private void InternalSetGroupType(DB.GroupType GroupType)
         {
-            InternalGroup = group;
-            InternalElementId = group.Id;
-            InternalUniqueId = group.UniqueId;
+            InternalGroupType = GroupType;
+            InternalElementId = GroupType.Id;
+            InternalUniqueId = GroupType.UniqueId;
         }
 
         #endregion
@@ -122,33 +202,55 @@ namespace Revit.Elements
         #region Public static constructors
 
         /// <summary>
-        /// Place an instance of a Revit group
+        /// Create a Revit GroupType
+        /// from a set of elements
         /// </summary>
-        /// <param name="point">Location point for the group instance</param>
-        /// <param name="groupType">The type of the group</param>
+        /// <param name="elements">A set of elements which will be made into the new GroupType.</param>
         /// <returns></returns>
-        public static Group PlaceGroupInstance(Point point,GroupType groupType)
+        public static GroupType FromElements(List<Element> elements)
         {
-            DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
+            List<DB.ElementId> ids = new List<DB.ElementId>();
+            foreach (Element elem in elements)
+            {
+                ids.Add(elem.InternalElement.Id);
+            }
 
-            return new Group(revitPoint,groupType.InternalGroupType);
+            return new GroupType(ids);
         }
 
         /// <summary>
-        /// Create a group
-        /// from an Revit group
+        /// Create a Revit GroupType
+        /// from a set of elements and a name
+        /// </summary>
+        /// <param name="elements">A set of elements which will be made into the new GroupType.</param>
+        /// <param name="name">the name of the GroupType.</param>
+        /// <returns></returns>
+        public static GroupType FromElementsAndName(List<Element> elements, string name)
+        {
+            List<DB.ElementId> ids = new List<DB.ElementId>();
+            foreach (Element elem in elements)
+            {
+                ids.Add(elem.InternalElement.Id);
+            }
+
+            return new GroupType(ids,name);
+        }
+
+        /// <summary>
+        /// Create a GroupType
+        /// from an Revit GroupType
         /// </summary>
         /// <param name="element">The origin element</param>
         /// <returns></returns>
-        public static Group FromElement(Element element)
+        public static GroupType FromElement(Element element)
         {
-            if (element.InternalElement.GetType() == typeof(DB.Group))
+            if (element.InternalElement.GetType() == typeof(DB.GroupType))
             {
-                return new Group(element.InternalElement as DB.Group);
+                return new GroupType(element.InternalElement as DB.GroupType);
             }
             else
             {
-                throw new ArgumentException("The Element is not a Revit Group");
+                throw new ArgumentException("The Element is not a Revit GroupType");
             }
         }
 
@@ -169,15 +271,15 @@ namespace Revit.Elements
         //{
         //    string roomName = "Unoccupied";
         //    string roomNumber = "Unoccupied";
-        //    if (InternalGroup.Room != null)
+        //    if (InternalGroupType.Room != null)
         //    {
-        //        roomName = InternalGroup.Room.Name;
-        //        roomNumber = InternalGroup.Room.Number;
+        //        roomName = InternalGroupType.Room.Name;
+        //        roomNumber = InternalGroupType.Room.Number;
         //    }
         //    return new Dictionary<string, string>()
         //        {
-        //            {"Name",InternalGroup.Name},
-        //            {"Number",InternalGroup.Number},
+        //            {"Name",InternalGroupType.Name},
+        //            {"Number",InternalGroupType.Number},
         //            {"Room Name",roomName},
         //            {"Room Number",roomNumber}
         //        };
@@ -194,7 +296,7 @@ namespace Revit.Elements
         //        DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
         //        DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
 
-        //        foreach (List<DB.BoundarySegment> segments in InternalGroup.GetBoundarySegments(opt))
+        //        foreach (List<DB.BoundarySegment> segments in InternalGroupType.GetBoundarySegments(opt))
         //        {
         //            foreach (DB.BoundarySegment segment in segments)
         //            {
@@ -229,14 +331,14 @@ namespace Revit.Elements
         #region Internal static constructors
 
         /// <summary>
-        /// Create a group from an existing reference
+        /// Create a space from an existing reference
         /// </summary>
-        /// <param name="group"></param>
+        /// <param name="GroupType"></param>
         /// <param name="isRevitOwned"></param>
         /// <returns></returns>
-        internal static Group FromExisting(DB.Group group, bool isRevitOwned)
+        internal static GroupType FromExisting(DB.GroupType GroupType, bool isRevitOwned)
         {
-            return new Group(group)
+            return new GroupType(GroupType)
             {
                 //IsRevitOwned = isRevitOwned
             };
@@ -265,7 +367,7 @@ namespace Revit.Elements
         //    //Boundaries
         //    DB.SpatialElementBoundaryOptions options = new DB.SpatialElementBoundaryOptions();
         //    options.SpatialElementBoundaryLocation = DB.SpatialElementBoundaryLocation.Finish;
-        //    foreach (List<DB.BoundarySegment> segments in InternalGroup.GetBoundarySegments(options))
+        //    foreach (List<DB.BoundarySegment> segments in InternalGroupType.GetBoundarySegments(options))
         //    {
         //        foreach (DB.BoundarySegment segment in segments)
         //        {
@@ -306,7 +408,7 @@ namespace Revit.Elements
         /// <returns>The string representation of our object.</returns>
         public override string ToString()
         {
-            return string.Format("Model Group - {0}", InternalGroup.Name);
+            return string.Format("Model GroupType - {0}", InternalGroupType.Name);
         }
 
         #endregion

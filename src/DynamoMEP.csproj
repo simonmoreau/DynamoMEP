@@ -50,6 +50,10 @@
       <HintPath>C:\Program Files\Autodesk\Revit 2016\RevitAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>..\..\..\..\..\Program Files\Autodesk\Revit 2016\RevitAPIUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="RevitNodes">
       <HintPath>C:\Program Files\Dynamo 0.8\Revit_2016\RevitNodes.dll</HintPath>
       <Private>False</Private>
@@ -68,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Revit\Group.cs" />
     <Compile Include="Revit\RevitUtilities.cs" />
     <Compile Include="Revit\Space.cs" />
     <Compile Include="Revit\Room.cs" />

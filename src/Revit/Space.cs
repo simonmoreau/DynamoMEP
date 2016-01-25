@@ -16,7 +16,7 @@ namespace Revit.Elements
     /// MEP Spaces
     /// </summary>
     [DynamoServices.RegisterForTrace]
-    public class Space : Element, IGraphicItem
+    public class Space : Element
     {
         #region Internal Properties
 
@@ -25,6 +25,7 @@ namespace Revit.Elements
         /// </summary>
         internal DB.Mechanical.Space InternalSpace
         {
+
             get;
             private set;
         }
@@ -36,6 +37,8 @@ namespace Revit.Elements
         {
             get { return InternalSpace; }
         }
+
+        internal List<DB.BoundarySegment> InternalBoundarySegments = new List<DB.BoundarySegment>();
 
         #endregion
 
@@ -69,6 +72,15 @@ namespace Revit.Elements
         private void InitSpace(DB.Mechanical.Space room)
         {
             InternalSetSpace(room);
+        }
+
+        /// <summary>
+        /// Transform of the Element
+        /// </summary>
+        internal DB.Transform InternalTransform
+        {
+            get;
+            private set;
         }
 
 
@@ -115,6 +127,50 @@ namespace Revit.Elements
             InternalSpace = space;
             InternalElementId = space.Id;
             InternalUniqueId = space.UniqueId;
+            InternalBoundarySegments = GetBoundarySegment();
+            InternalTransform = GetTransform();
+        }
+
+        private DB.Transform GetTransform()
+        {
+            if (InternalElement.Document.GetHashCode() == DocumentManager.Instance.CurrentDBDocument.GetHashCode())
+            {
+                return DB.Transform.Identity;
+            }
+            else
+            {
+                //Find the revit instance where we find the room
+                DB.FilteredElementCollector collector = new DB.FilteredElementCollector(DocumentManager.Instance.CurrentDBDocument);
+                List<DB.RevitLinkInstance> linkInstances = collector.OfCategory(DB.BuiltInCategory.OST_RvtLinks).WhereElementIsNotElementType().ToElements().Cast<DB.RevitLinkInstance>().ToList();
+                DB.RevitLinkInstance roomLinkInstance = linkInstances.FirstOrDefault();
+
+                foreach (DB.RevitLinkInstance linkInstance in linkInstances)
+                {
+                    if (linkInstance.GetLinkDocument().GetHashCode() == InternalElement.Document.GetHashCode())
+                    {
+                        roomLinkInstance = linkInstance;
+                        break;
+                    }
+                }
+
+                return roomLinkInstance.GetTotalTransform();
+            }
+        }
+
+        private List<DB.BoundarySegment> GetBoundarySegment()
+        {
+            List<DB.BoundarySegment> output = new List<DB.BoundarySegment>();
+            DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
+
+            foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(opt))
+            {
+                foreach (DB.BoundarySegment segment in segments)
+                {
+                    output.Add(segment);
+                }
+            }
+
+            return output.Distinct().ToList();
         }
 
         #endregion
@@ -131,10 +187,55 @@ namespace Revit.Elements
         public static Space ByPointAndLevel(Point point, Level level)
         {
             DB.Level revitLevel = level.InternalElement as DB.Level;
+            DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
 
-            DB.UV uv = new DB.UV(point.X, point.Y);
+            DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
 
             return new Space(revitLevel, uv);
+        }
+
+        /// <summary>
+        /// Create a `MEP Space
+        /// based on a location
+        /// </summary>
+        /// <param name="point">Location point for the space</param>
+        /// <returns></returns>
+        public static Space ByPoint(Point point)
+        {
+            DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
+            DB.Level revitLevel = GetNearestLevel(revitPoint);
+
+            DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
+
+            return new Space(revitLevel, uv);
+        }
+
+        /// <summary>
+        /// Find the nearest level in the active document
+        /// </summary>
+        /// <param name="point">The reference point</param>
+        /// <returns></returns>
+        private static DB.Level GetNearestLevel(DB.XYZ point)
+        {
+            //find all level in the active document
+            DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
+
+            DB.FilteredElementCollector collector = new DB.FilteredElementCollector(doc);
+            List<DB.Level> activeLevels = collector.OfCategory(DB.BuiltInCategory.OST_Levels).WhereElementIsNotElementType().ToElements().Cast<DB.Level>().ToList();
+
+            DB.Level nearestLevel = activeLevels.FirstOrDefault();
+            double delta = Math.Abs(nearestLevel.ProjectElevation - point.Z);
+
+            foreach (DB.Level currentLevel in activeLevels)
+            {
+                if (Math.Abs(currentLevel.ProjectElevation - point.Z) < delta)
+                {
+                    nearestLevel = currentLevel;
+                    delta = Math.Abs(currentLevel.ProjectElevation - point.Z);
+                }
+            }
+
+            return nearestLevel;
         }
 
         /// <summary>
@@ -168,7 +269,7 @@ namespace Revit.Elements
         /// <returns name="Room Name">The associated room Name</returns>
         /// <returns name="Room Number">The associated room Number</returns>
         [MultiReturn(new[] { "Name", "Number", "Room Number", "Room Name" })]
-        public Dictionary<string, string> IdentificationData()
+        public Dictionary<string, string> GetIdentificationData()
         {
             string roomName = "Unoccupied";
             string roomNumber = "Unoccupied";
@@ -177,7 +278,7 @@ namespace Revit.Elements
                 roomName = InternalSpace.Room.Name;
                 roomNumber = InternalSpace.Room.Number;
             }
-                return new Dictionary<string, string>()
+            return new Dictionary<string, string>()
                 {
                     {"Name",InternalSpace.Name},
                     {"Number",InternalSpace.Number},
@@ -194,38 +295,53 @@ namespace Revit.Elements
             get
             {
                 List<Element> output = new List<Element>();
-                DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
-                DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
-                
-                foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(opt))
-                {
-                    foreach (DB.BoundarySegment segment in segments)
-                    {
-                        DB.Element boundaryElement = doc.GetElement(segment.ElementId);
+                DB.Document doc = InternalElement.Document;
 
+                foreach (DB.BoundarySegment segment in InternalBoundarySegments)
+                {
+                    DB.Element boundaryElement = doc.GetElement(segment.ElementId);
+                    if (boundaryElement.GetType() == typeof(DB.RevitLinkInstance))
+                    {
+                        DB.RevitLinkInstance linkInstance = boundaryElement as DB.RevitLinkInstance;
+                        DB.Element linkBoundaryElement = linkInstance.GetLinkDocument().GetElement(segment.LinkElementId);
+                        output.Add(ElementWrapper.ToDSType(linkBoundaryElement, true));
+                    }
+                    else
+                    {
                         output.Add(ElementWrapper.ToDSType(boundaryElement, true));
                     }
-                    
                 }
+
                 output = output.Distinct().ToList();
                 return output;
             }
         }
 
-        private List<Curve> _boundaryCurves = new List<Curve>();
-
         /// <summary>
-        /// Retrive space boundary curves
+        /// Retrive the space associated level
         /// </summary>
-        public List<Curve> BoundaryCurves
+        public Level Level
         {
             get
             {
-                return _boundaryCurves;
+                DB.Document doc = InternalElement.Document;
+                DB.Element roomLevel = doc.GetElement(InternalElement.LevelId);
+
+                return ElementWrapper.ToDSType(roomLevel, true) as Level;
             }
         }
-        
 
+        /// <summary>
+        /// Retrive the sapce location
+        /// </summary>
+        public Point LocationPoint
+        {
+            get
+            {
+                DB.LocationPoint locPoint = InternalElement.Location as DB.LocationPoint;
+                return GeometryPrimitiveConverter.ToPoint(InternalTransform.OfPoint(locPoint.Point));
+            }
+        }
 
         #endregion
 
@@ -262,26 +378,19 @@ namespace Revit.Elements
 
             //Location Point
             DB.LocationPoint locPoint = InternalElement.Location as DB.LocationPoint;
-            package.AddPointVertex(locPoint.Point.X, locPoint.Point.Y, locPoint.Point.Z);
-            package.AddPointVertexColor(255, 0, 0, 255);
+            GeometryPrimitiveConverter.ToPoint(InternalTransform.OfPoint(locPoint.Point)).Tessellate(package, parameters);
+            package.ApplyPointVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, 255, 0, 0, 0));
 
             //Boundaries
-            DB.SpatialElementBoundaryOptions options = new DB.SpatialElementBoundaryOptions();
-            options.SpatialElementBoundaryLocation = DB.SpatialElementBoundaryLocation.Finish;
-            foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(options))
+            foreach (DB.BoundarySegment segment in InternalBoundarySegments)
             {
-                foreach (DB.BoundarySegment segment in segments)
+                Curve crv = RevitToProtoCurve.ToProtoType(segment.GetCurve().CreateTransformed(InternalTransform));
+
+                crv.Tessellate(package, parameters);
+
+                if (package.LineVertexCount > 0)
                 {
-                    Curve crv = RevitToProtoCurve.ToProtoType(segment.GetCurve());
-
-                    crv.Tessellate(package, parameters);
-                    
-                    _boundaryCurves.Add(crv);
-
-                    if (package.LineVertexCount > 0)
-                    {
-                        package.ApplyLineVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, 255, 0, 0, 0));
-                    }
+                    package.ApplyLineVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, 255, 0, 0, 0));
                 }
             }
         }

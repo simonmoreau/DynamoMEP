@@ -280,6 +280,45 @@ namespace Revit.Elements
         }
 
         /// <summary>
+        /// Determine if an element lies
+        /// within the volume of the Room
+        /// </summary>
+        public bool IsInRoom(Element element)
+        {
+            DB.FamilyInstance familyInstance = element.InternalElement as DB.FamilyInstance;
+            if (familyInstance != null)
+            {
+                if (familyInstance.HasSpatialElementCalculationPoint)
+                {
+                    DB.XYZ insertionPoint = familyInstance.GetSpatialElementCalculationPoint();
+
+                    if (InternalRoom.IsPointInRoom(insertionPoint))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            DB.LocationPoint insertionLocationPoint = element.InternalElement.Location as DB.LocationPoint;
+            if (insertionLocationPoint != null)
+            {
+                DB.XYZ insertionPoint = insertionLocationPoint.Point;
+
+                if (InternalRoom.IsPointInRoom(insertionPoint))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+
+        }
+
+        /// <summary>
         /// Retrive room boundary elements
         /// </summary>
         public List<Element> BoundaryElements

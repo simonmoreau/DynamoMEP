@@ -97,7 +97,9 @@ namespace Revit.Elements
             var roomElem = ElementBinder.GetElementFromTrace<DB.Mechanical.Space>(document);
 
             if (roomElem == null)
+            {
                 roomElem = document.Create.NewSpace(level, point);
+            }
 
             InternalSetSpace(roomElem);
 
@@ -186,6 +188,12 @@ namespace Revit.Elements
         /// <returns></returns>
         public static Space ByPointAndLevel(Point point, Level level)
         {
+            //Check if the level is in the document
+            if (level.InternalElement.Document != DocumentManager.Instance.CurrentDBDocument)
+            {
+                throw new ArgumentException("The level does not exist in the given document");
+            }
+
             DB.Level revitLevel = level.InternalElement as DB.Level;
             DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
 
@@ -341,6 +349,45 @@ namespace Revit.Elements
                 DB.LocationPoint locPoint = InternalElement.Location as DB.LocationPoint;
                 return GeometryPrimitiveConverter.ToPoint(InternalTransform.OfPoint(locPoint.Point));
             }
+        }
+
+        /// <summary>
+        /// Determine if an element lies
+        /// within the volume of the Space
+        /// </summary>
+        public bool IsInSpace(Element element)
+        {
+            DB.FamilyInstance familyInstance = element.InternalElement as DB.FamilyInstance;
+            if (familyInstance != null)
+            {
+                if (familyInstance.HasSpatialElementCalculationPoint)
+                {
+                    DB.XYZ insertionPoint = familyInstance.GetSpatialElementCalculationPoint();
+
+                    if (InternalSpace.IsPointInSpace(insertionPoint))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            DB.LocationPoint insertionLocationPoint = element.InternalElement.Location as DB.LocationPoint;
+            if (insertionLocationPoint != null)
+            {
+                DB.XYZ insertionPoint = insertionLocationPoint.Point;
+
+                if (InternalSpace.IsPointInSpace(insertionPoint))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+            
         }
 
         #endregion

@@ -390,6 +390,37 @@ namespace Revit.Elements
             
         }
 
+
+        /// <summary>
+        /// Return a grid of points in the space
+        /// </summary>
+        /// <param name="step">Lenght between two points</param>
+        public List<Point> Grid(double step)
+        {
+            step = UnitConverter.DynamoToHostFactor(DB.UnitType.UT_Length) * step;
+            List<Point> grid = new List<Point>();
+
+            DB.BoundingBoxXYZ bb = InternalElement.get_BoundingBox(null);
+
+            for (double x = bb.Min.X; x < bb.Max.X;)
+            {
+                for (double y = bb.Min.Y; y < bb.Max.Y;)
+                {
+                    DB.XYZ point = new DB.XYZ(x, y, bb.Min.Z);
+                    if (InternalSpace.IsPointInSpace(point))
+                    {
+                        grid.Add(GeometryPrimitiveConverter.ToPoint(InternalTransform.OfPoint(point)));
+                    }
+                    y = y + step;
+                }
+
+                x = x + step;
+            }
+
+            return grid;
+        }
+
+
         #endregion
 
         #region Internal static constructors

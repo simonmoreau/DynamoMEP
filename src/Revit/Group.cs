@@ -73,7 +73,7 @@ namespace Revit.Elements
         /// Place a Group in the model
         /// </summary>
         /// <param name="point">The group instance location</param>
-        /// <param name="GroupType">The type of the group</param>
+        /// <param name="groupType">The type of the group</param>
         private void InitGroup(DB.XYZ point,DB.GroupType groupType)
         {
             DB.Document document = DocumentManager.Instance.CurrentDBDocument;

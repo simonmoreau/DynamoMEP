@@ -162,24 +162,24 @@ namespace Revit.Elements
         ///// </summary>
         ///// <returns name="Name">The MEPSpace Name</returns>
         ///// <returns name="Number">The MEPSpace Number</returns>
-        ///// <returns name="Room Name">The associated room Name</returns>
-        ///// <returns name="Room Number">The associated room Number</returns>
-        //[MultiReturn(new[] { "Name", "Number", "Room Number", "Room Name" })]
+        ///// <returns name="CustomRoom Name">The associated room Name</returns>
+        ///// <returns name="CustomRoom Number">The associated room Number</returns>
+        //[MultiReturn(new[] { "Name", "Number", "CustomRoom Number", "CustomRoom Name" })]
         //public Dictionary<string, string> IdentificationData()
         //{
         //    string roomName = "Unoccupied";
         //    string roomNumber = "Unoccupied";
-        //    if (InternalGroup.Room != null)
+        //    if (InternalGroup.CustomRoom != null)
         //    {
-        //        roomName = InternalGroup.Room.Name;
-        //        roomNumber = InternalGroup.Room.Number;
+        //        roomName = InternalGroup.CustomRoom.Name;
+        //        roomNumber = InternalGroup.CustomRoom.Number;
         //    }
         //    return new Dictionary<string, string>()
         //        {
         //            {"Name",InternalGroup.Name},
         //            {"Number",InternalGroup.Number},
-        //            {"Room Name",roomName},
-        //            {"Room Number",roomNumber}
+        //            {"CustomRoom Name",roomName},
+        //            {"CustomRoom Number",roomNumber}
         //        };
         //}
 

@@ -35,11 +35,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DynamoServices">
-      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Core\1.0\DynamoServices.dll</HintPath>
+      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Core\1.2\DynamoServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ProtoGeometry">
-      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Core\1.0\ProtoGeometry.dll</HintPath>
+      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Core\1.2\ProtoGeometry.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPI">
@@ -51,11 +51,11 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitNodes">
-      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Revit\1.0\Revit_2017\RevitNodes.dll</HintPath>
+      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Revit\1.2\Revit_2017\RevitNodes.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitServices">
-      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Revit\1.0\Revit_2017\RevitServices.dll</HintPath>
+      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Revit\1.2\Revit_2017\RevitServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -72,7 +72,7 @@
     <Compile Include="Revit\Group.cs" />
     <Compile Include="Revit\GroupType.cs" />
     <Compile Include="Revit\Space.cs" />
-    <Compile Include="Revit\Room.cs" />
+    <Compile Include="Revit\CustomRoom.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -232,9 +232,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)bin\Debug\DynamoMEP.dll" "$(AppData)\Dynamo\Dynamo Revit\1.0\packages\DynamoMEP\bin"
-copy "$(ProjectDir)bin\Debug\DynamoMEP.customization.dll" "$(AppData)\Dynamo\Dynamo Revit\1.0\packages\DynamoMEP\bin"
-copy "$(ProjectDir)bin\Debug\DynamoMEP.XML" "$(AppData)\Dynamo\Dynamo Revit\1.0\packages\DynamoMEP\bin"</PostBuildEvent>
+    <PostBuildEvent>copy "$(ProjectDir)bin\Debug\DynamoMEP.dll" "$(AppData)\Dynamo\Dynamo Revit\1.2\packages\DynamoMEP\bin"
+copy "$(ProjectDir)bin\Debug\DynamoMEP.customization.dll" "$(AppData)\Dynamo\Dynamo Revit\1.2\packages\DynamoMEP\bin"
+copy "$(ProjectDir)bin\Debug\DynamoMEP.XML" "$(AppData)\Dynamo\Dynamo Revit\1.2\packages\DynamoMEP\bin"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

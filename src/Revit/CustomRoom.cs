@@ -16,7 +16,7 @@ namespace Revit.Elements
     /// MEP Rooms
     /// </summary>
     [DynamoServices.RegisterForTrace]
-    public class Room : Element, IGraphicItem
+    public class CustomRoom : Element, IGraphicItem
     {
         #region Internal Properties
 
@@ -56,13 +56,13 @@ namespace Revit.Elements
         /// Create from an existing Revit Element
         /// </summary>
         /// <param name="room">An existing Revit room</param>
-        private Room(DB.Architecture.Room room)
+        private CustomRoom(DB.Architecture.Room room)
         {
             SafeInit(() => InitRoom(room));
         }
 
 
-        private Room(
+        private CustomRoom(
             DB.Level level,
             DB.UV point)
         {
@@ -139,7 +139,7 @@ namespace Revit.Elements
                 DB.FilteredElementCollector collector = new DB.FilteredElementCollector(DocumentManager.Instance.CurrentDBDocument);
                 List<DB.RevitLinkInstance> linkInstances = collector.OfCategory(DB.BuiltInCategory.OST_RvtLinks).WhereElementIsNotElementType().ToElements().Cast<DB.RevitLinkInstance>().ToList();
                 DB.RevitLinkInstance roomLinkInstance = linkInstances.FirstOrDefault();
-                
+
                 foreach (DB.RevitLinkInstance linkInstance in linkInstances)
                 {
                     if (linkInstance.GetLinkDocument().GetHashCode() == InternalElement.Document.GetHashCode())
@@ -166,7 +166,7 @@ namespace Revit.Elements
                 }
             }
 
-             return output.Distinct().ToList();
+            return output.Distinct().ToList();
         }
 
         #endregion
@@ -180,14 +180,14 @@ namespace Revit.Elements
         /// <param name="point">Location point for the room</param>
         /// <param name="level">Level of the room</param>
         /// <returns></returns>
-        public static Room ByPointAndLevel(Point point, Level level)
+        public static CustomRoom ByPointAndLevel(Point point, Level level)
         {
             DB.Level revitLevel = level.InternalElement as DB.Level;
             DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
 
             DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
 
-            return new Room(revitLevel, uv);
+            return new CustomRoom(revitLevel, uv);
         }
 
         /// <summary>
@@ -196,14 +196,14 @@ namespace Revit.Elements
         /// </summary>
         /// <param name="point">Location point for the room</param>
         /// <returns></returns>
-        public static Room ByPoint(Point point)
+        public static CustomRoom ByPoint(Point point)
         {
             DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
             DB.Level revitLevel = GetNearestLevel(revitPoint);
 
             DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
 
-            return new Room(revitLevel, uv);
+            return new CustomRoom(revitLevel, uv);
         }
 
         /// <summary>
@@ -240,13 +240,13 @@ namespace Revit.Elements
         /// </summary>
         /// <param name="element">The origin element</param>
         /// <returns></returns>
-        public static Room FromElement(Element element)
+        public static CustomRoom FromElement(Element element)
         {
             if (element != null)
             {
                 if (element.InternalElement.GetType() == typeof(DB.Architecture.Room))
                 {
-                    return new Room(element.InternalElement as DB.Architecture.Room);
+                    return new CustomRoom(element.InternalElement as DB.Architecture.Room);
                 }
                 else
                 {
@@ -329,7 +329,7 @@ namespace Revit.Elements
 
             DB.BoundingBoxXYZ bb = InternalElement.get_BoundingBox(null);
 
-            for (double x = bb.Min.X;x<bb.Max.X;)
+            for (double x = bb.Min.X; x < bb.Max.X;)
             {
                 for (double y = bb.Min.Y; y < bb.Max.Y;)
                 {
@@ -411,70 +411,70 @@ namespace Revit.Elements
         /// <returns></returns>
         private List<FamilyInstance> BoundaryFamilyInstance(DB.BuiltInCategory cat)
         {
-                List<FamilyInstance> output = new List<FamilyInstance>();
+            List<FamilyInstance> output = new List<FamilyInstance>();
 
-                //the document of the room
-                DB.Document doc = InternalElement.Document; // DocumentManager.Instance.CurrentDBDocument;
+            //the document of the room
+            DB.Document doc = InternalElement.Document; // DocumentManager.Instance.CurrentDBDocument;
 
-                //Find boundary elements and their associated document
-                List<DB.ElementId> boundaryElements = new List<DB.ElementId>();
-                List<DB.Document> boundaryDocuments = new List<DB.Document>();
+            //Find boundary elements and their associated document
+            List<DB.ElementId> boundaryElements = new List<DB.ElementId>();
+            List<DB.Document> boundaryDocuments = new List<DB.Document>();
 
-                foreach (DB.BoundarySegment segment in InternalBoundarySegments)
+            foreach (DB.BoundarySegment segment in InternalBoundarySegments)
+            {
+                DB.Element boundaryElement = doc.GetElement(segment.ElementId);
+                if (boundaryElement.GetType() == typeof(DB.RevitLinkInstance))
                 {
-                    DB.Element boundaryElement = doc.GetElement(segment.ElementId);
-                    if (boundaryElement.GetType() == typeof(DB.RevitLinkInstance))
+                    DB.RevitLinkInstance linkInstance = boundaryElement as DB.RevitLinkInstance;
+                    boundaryDocuments.Add(linkInstance.GetLinkDocument());
+                    boundaryElements.Add(segment.LinkElementId);
+                }
+                else
+                {
+                    boundaryDocuments.Add(doc);
+                    boundaryElements.Add(segment.ElementId);
+                }
+            }
+
+            // Create a category filter
+            DB.ElementCategoryFilter filter = new DB.ElementCategoryFilter(cat);
+            // Apply the filter to the elements in these documents,
+            // Use shortcut WhereElementIsNotElementType() to find family instances in all boundary documents
+            boundaryDocuments = boundaryDocuments.Distinct().ToList();
+            List<DB.FamilyInstance> familyInstances = new List<DB.FamilyInstance>();
+            foreach (DB.Document boundaryDocument in boundaryDocuments)
+            {
+                DB.FilteredElementCollector collector = new DB.FilteredElementCollector(boundaryDocument);
+                familyInstances.AddRange(collector.WherePasses(filter).WhereElementIsNotElementType().ToElements().Cast<DB.FamilyInstance>().ToList());
+            }
+
+            //Find all family instance hosted on a boundary element
+            IEnumerable<DB.FamilyInstance> boundaryFamilyInstances = familyInstances.Where(s => boundaryElements.Contains(s.Host.Id));
+
+            //loop on these boundary family instance to find to and from room
+            foreach (DB.FamilyInstance boundaryFamilyInstance in boundaryFamilyInstances)
+            {
+                DB.Phase familyInstancePhase = boundaryFamilyInstance.Document.GetElement(boundaryFamilyInstance.CreatedPhaseId) as DB.Phase;
+                if (boundaryFamilyInstance.get_FromRoom(familyInstancePhase) != null)
+                {
+                    if (boundaryFamilyInstance.get_FromRoom(familyInstancePhase).Id == InternalRoom.Id)
                     {
-                        DB.RevitLinkInstance linkInstance = boundaryElement as DB.RevitLinkInstance;
-                        boundaryDocuments.Add(linkInstance.GetLinkDocument());
-                        boundaryElements.Add(segment.LinkElementId);
-                    }
-                    else
-                    {
-                        boundaryDocuments.Add(doc);
-                        boundaryElements.Add(segment.ElementId);
+                        output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as FamilyInstance);
+                        continue;
                     }
                 }
 
-                // Create a category filter
-                DB.ElementCategoryFilter filter = new DB.ElementCategoryFilter(cat);
-                // Apply the filter to the elements in these documents,
-                // Use shortcut WhereElementIsNotElementType() to find family instances in all boundary documents
-                boundaryDocuments = boundaryDocuments.Distinct().ToList();
-                List<DB.FamilyInstance> familyInstances = new List<DB.FamilyInstance>();
-                foreach (DB.Document boundaryDocument in boundaryDocuments)
+                if (boundaryFamilyInstance.get_ToRoom(familyInstancePhase) != null)
                 {
-                    DB.FilteredElementCollector collector = new DB.FilteredElementCollector(boundaryDocument);
-                    familyInstances.AddRange(collector.WherePasses(filter).WhereElementIsNotElementType().ToElements().Cast<DB.FamilyInstance>().ToList());
-                }
-
-                //Find all family instance hosted on a boundary element
-                IEnumerable<DB.FamilyInstance> boundaryFamilyInstances = familyInstances.Where(s => boundaryElements.Contains(s.Host.Id));
-
-                //loop on these boundary family instance to find to and from room
-                foreach (DB.FamilyInstance boundaryFamilyInstance in boundaryFamilyInstances)
-                {
-                    DB.Phase familyInstancePhase = boundaryFamilyInstance.Document.GetElement(boundaryFamilyInstance.CreatedPhaseId) as DB.Phase;
-                    if (boundaryFamilyInstance.get_FromRoom(familyInstancePhase) != null)
+                    if (boundaryFamilyInstance.get_ToRoom(familyInstancePhase).Id == InternalRoom.Id)
                     {
-                        if (boundaryFamilyInstance.get_FromRoom(familyInstancePhase).Id == InternalRoom.Id)
-                        {
-                            output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as FamilyInstance);
-                            continue;
-                        }
-                    }
-
-                    if (boundaryFamilyInstance.get_ToRoom(familyInstancePhase) != null)
-                    {
-                        if (boundaryFamilyInstance.get_ToRoom(familyInstancePhase).Id == InternalRoom.Id)
-                        {
-                            output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as FamilyInstance);
-                        }
+                        output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as FamilyInstance);
                     }
                 }
+            }
 
-                output = output.Distinct().ToList();
-                return output;
+            output = output.Distinct().ToList();
+            return output;
         }
 
         /// <summary>
@@ -509,9 +509,9 @@ namespace Revit.Elements
         /// <param name="room"></param>
         /// <param name="isRevitOwned"></param>
         /// <returns></returns>
-        internal static Room FromExisting(DB.Architecture.Room room, bool isRevitOwned)
+        internal static CustomRoom FromExisting(DB.Architecture.Room room, bool isRevitOwned)
         {
-            return new Room(room)
+            return new CustomRoom(room)
             {
                 //IsRevitOwned = isRevitOwned
             };

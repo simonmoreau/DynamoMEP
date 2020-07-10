@@ -75,164 +75,18 @@
     <Compile Include="Revit\Space.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DynamoMEPImages.resx" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
     <None Include="pkg.json" />
-    <None Include="Resources\Revit.Elements.Room.ByPointAndLevel.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.ByPointAndLevel.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.FromElement.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.FromElement.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.GetIdentificationData.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.Grid.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.Grid.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.IsInRoom.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.IsInRoom.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.ByPoint.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.ByPoint.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.GetIdentificationData.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.BoundaryElements.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.Doors.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.Doors.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.Level.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.Level.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.LocationPoint.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.LocationPoint.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.Windows.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.Windows.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Room.BoundaryElements.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.GetIdentificationData.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.GetIdentificationData.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.Grid.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.Grid.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.IsInSpace.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.IsInSpace.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.Level.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.Level.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.LocationPoint.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.LocationPoint.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.BoundaryElements.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.BoundaryElements.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.ByPoint.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.ByPoint.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.ByPointAndLevel.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.ByPointAndLevel.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.FromElement.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Space.FromElement.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.GroupType.FromElementsAndName.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Group.FromElement.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Group.FromElement.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Group.PlaceGroupInstance.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.Group.PlaceGroupInstance.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.GroupType.FromElement.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.GroupType.FromElement.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.GroupType.FromElements.Large.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.GroupType.FromElements.Small.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Revit.Elements.GroupType.FromElementsAndName.Large.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DynamoMEP_DynamoCustomization.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\DynamoMEP.Group.FromElement.Large.png" />
+    <Content Include="Resources\DynamoMEP.Group.FromElement.Small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DynamoMEPImages.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -262,8 +116,19 @@ copy "$(ProjectDir)pkg.json" %25packagePath%25
     <GetReferenceAssemblyPaths TargetFrameworkMoniker=".NETFramework, Version=v2.0">
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="FrameworkAssembliesPath" />
     </GetReferenceAssemblyPaths>
-    <GenerateResource UseSourcePath="true" Sources="$(ProjectDir)DynamoMEPImages.resx" OutputResources="$(ProjectDir)\Resources\DynamoMEPImages.resources" References="$(FrameworkAssembliesPath)System.Drawing.dll" />
-    <AL TargetType="library" EmbedResources="$(ProjectDir)\Resources\DynamoMEPImages.resources" OutputAssembly="$(OutDir)DynamoMEP.customization.dll" />
+  </Target>
+  <Target Name="AfterBuild">
+    <!-- Get System.Drawing.dll -->
+    <GetReferenceAssemblyPaths TargetFrameworkMoniker=".NETFramework, Version=v4.8">
+      <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="FrameworkAssembliesPath" />
+    </GetReferenceAssemblyPaths>
+    <!-- Get assembly -->
+    <GetAssemblyIdentity AssemblyFiles="$(OutDir)$(TargetName).dll">
+      <Output TaskParameter="Assemblies" ItemName="AssemblyInfo" />
+    </GetAssemblyIdentity>
+    <!-- Generate customization dll -->
+    <GenerateResource SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)" UseSourcePath="true" Sources="$(ProjectDir)\DynamoMEPImages.resx" OutputResources="$(ProjectDir)\Resources\DynamoMEPImages.resources" References="$(FrameworkAssembliesPath)System.Drawing.dll" />
+    <AL SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)" TargetType="library" EmbedResources="$(ProjectDir)\Resources\DynamoMEPImages.resources" OutputAssembly="$(OutDir)DynamoMEP.customization.dll" Version="%(AssemblyInfo.Version)" />
   </Target>
   <!---->
 </Project>

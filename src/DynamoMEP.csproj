@@ -73,7 +73,6 @@
     <Compile Include="Revit\GroupType.cs" />
     <Compile Include="Revit\Rooms.cs" />
     <Compile Include="Revit\Space.cs" />
-    <Compile Include="Revit\CustomRoom.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DynamoMEPImages.resx" />
@@ -229,6 +228,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Revit.Elements.GroupType.FromElementsAndName.Large.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DynamoMEP_DynamoCustomization.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

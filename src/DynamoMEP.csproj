@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DynamoMEP</RootNamespace>
     <AssemblyName>DynamoMEP</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -34,28 +34,28 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DynamoServices">
-      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Core\1.2\DynamoServices.dll</HintPath>
+    <Reference Include="DynamoServices, Version=2.6.1.8786, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\DynamoVisualProgramming.DynamoServices.2.6.1.8786\lib\net47\DynamoServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ProtoGeometry">
-      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Core\1.2\ProtoGeometry.dll</HintPath>
+    <Reference Include="DynamoUnits, Version=2.6.1.8786, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\DynamoVisualProgramming.ZeroTouchLibrary.2.6.1.8786\lib\net47\DynamoUnits.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ProtoGeometry, Version=2.6.0.8195, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\DynamoVisualProgramming.ZeroTouchLibrary.2.6.1.8786\lib\net47\ProtoGeometry.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPI">
-      <HintPath>$(ProgramW6432)\Autodesk\Revit 2017\RevitAPI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="RevitAPIUI">
-      <HintPath>$(ProgramW6432)\Autodesk\Revit 2017\RevitAPIUI.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitNodes">
-      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Revit\1.2\Revit_2017\RevitNodes.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Dynamo\Dynamo Revit\2\Revit_2019\RevitNodes.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitServices">
-      <HintPath>$(ProgramW6432)\Dynamo\Dynamo Revit\1.2\Revit_2017\RevitServices.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Dynamo\Dynamo Revit\2\Revit_2019\RevitServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -71,16 +71,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Revit\Group.cs" />
     <Compile Include="Revit\GroupType.cs" />
+    <Compile Include="Revit\Rooms.cs" />
     <Compile Include="Revit\Space.cs" />
     <Compile Include="Revit\CustomRoom.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DynamoMEPImages.resx" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="pkg.json" />
     <None Include="Resources\Revit.Elements.Room.ByPointAndLevel.Large.png" />
   </ItemGroup>
   <ItemGroup>
@@ -232,9 +232,20 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)bin\Debug\DynamoMEP.dll" "$(AppData)\Dynamo\Dynamo Revit\1.2\packages\DynamoMEP\bin"
-copy "$(ProjectDir)bin\Debug\DynamoMEP.customization.dll" "$(AppData)\Dynamo\Dynamo Revit\1.2\packages\DynamoMEP\bin"
-copy "$(ProjectDir)bin\Debug\DynamoMEP.XML" "$(AppData)\Dynamo\Dynamo Revit\1.2\packages\DynamoMEP\bin"</PostBuildEvent>
+    <PostBuildEvent>set SolutionName=DynamoMEP
+set SigntoolPath="C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe"
+call %25SigntoolPath%25 sign /sha1 3b428f7d77548f2f10a204bd551da1c3ede7c0e7 /d "%25SolutioName%25" /du "http://www.eai.fr" /t "http://timestamp.comodoca.com/authenticode" /fd sha256 "$(TargetPath)"
+
+set packagePath="$(AppData)\Dynamo\Dynamo Revit\2.5\packages\$(ProjectName)"
+set binpath="$(AppData)\Dynamo\Dynamo Revit\2.5\packages\$(ProjectName)\bin\"
+
+echo %25binpath%25
+
+copy "$(TargetDir)*.dll" %25binpath%25
+copy "$(TargetDir)*.xml" %25binpath%25
+copy "$(ProjectDir)pkg.json" %25packagePath%25
+
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

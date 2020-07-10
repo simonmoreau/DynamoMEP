@@ -1,0 +1,20 @@
+{
+  "license": "",
+  "file_hash": null,
+  "name": "DynamoMEP",
+  "version": "0.0.2",
+  "description": "MEP nodes for Dynamo.",
+  "group": "",
+  "keywords": null,
+  "dependencies": [],
+  "contents": "",
+  "engine_version": "2.6.0.0",
+  "engine": "dynamo",
+  "engine_metadata": "",
+  "site_url": "",
+  "repository_url": "",
+  "contains_binaries": true,
+  "node_libraries": [
+    "DynamoMEP, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+  ]
+}

@@ -534,19 +534,23 @@ namespace Revit.Elements
 
             //Location Point
             DB.LocationPoint locPoint = InternalElement.Location as DB.LocationPoint;
-            GeometryPrimitiveConverter.ToPoint(InternalTransform.OfPoint(locPoint.Point)).Tessellate(package, parameters);
-            package.ApplyPointVertexColors(CreateColorByteArrayOfSize(package.PointVertexCount, 255, 0, 0, 0));
 
-            //Boundaries
-            foreach (DB.BoundarySegment segment in InternalBoundarySegments)
+            if (locPoint != null)
             {
-                Curve crv = RevitToProtoCurve.ToProtoType(segment.GetCurve().CreateTransformed(InternalTransform));
+                GeometryPrimitiveConverter.ToPoint(InternalTransform.OfPoint(locPoint.Point)).Tessellate(package, parameters);
+                package.ApplyPointVertexColors(CreateColorByteArrayOfSize(package.PointVertexCount, 255, 0, 0, 0));
 
-                crv.Tessellate(package, parameters);
-
-                if (package.LineVertexCount > 0)
+                //Boundaries
+                foreach (DB.BoundarySegment segment in InternalBoundarySegments)
                 {
-                    package.ApplyLineVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, 255, 0, 0, 0));
+                    Curve crv = RevitToProtoCurve.ToProtoType(segment.GetCurve().CreateTransformed(InternalTransform));
+
+                    crv.Tessellate(package, parameters);
+
+                    if (package.LineVertexCount > 0)
+                    {
+                        package.ApplyLineVertexColors(CreateColorByteArrayOfSize(package.LineVertexCount, 255, 0, 0, 0));
+                    }
                 }
             }
         }

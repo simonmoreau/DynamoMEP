@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Revit.Elements;
 using DB = Autodesk.Revit.DB;
+using Autodesk.DesignScript.Geometry;
+using RevitServices.Persistence;
+using Revit.GeometryConversion;
 
 
 namespace DynamoMEP
@@ -14,6 +17,111 @@ namespace DynamoMEP
     /// </summary>
     public static class Room
     {
+        /// <summary>
+        /// Create a Room
+        /// based on a location
+        /// </summary>
+        /// <param name="point">Location point for the room</param>
+        /// <returns></returns>
+        public static Revit.Elements.Room ByPoint(Point point)
+        {
+            DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
+            DB.Level revitLevel = GetNearestLevel(revitPoint);
+
+            Revit.Elements.Level level = revitLevel.ToDSType(false) as Revit.Elements.Level;
+
+            // return new Revit.Elements.Room(revitLevel, uv);
+            return Revit.Elements.Room.ByLocation(level, point);
+        }
+
+        /// <summary>
+        /// Return a grid of points in the room
+        /// </summary>
+        /// <param name="room">The room in which the grid is created</param>
+        /// <param name="step">Lenght between two points</param>
+        public static List<Point> Grid(this Revit.Elements.Room room, double step)
+        {
+            step = UnitConverter.DynamoToHostFactor(DB.UnitType.UT_Length) * step;
+            List<Point> grid = new List<Point>();
+            DB.Architecture.Room InternalRoom = room.InternalElement as DB.Architecture.Room;
+
+            if (InternalRoom != null)
+            {
+                DB.BoundingBoxXYZ bb = room.InternalElement.get_BoundingBox(null);
+
+                for (double x = bb.Min.X; x < bb.Max.X;)
+                {
+                    for (double y = bb.Min.Y; y < bb.Max.Y;)
+                    {
+                        DB.XYZ point = new DB.XYZ(x, y, bb.Min.Z);
+                        if (InternalRoom.IsPointInRoom(point))
+                        {
+                            grid.Add(GeometryPrimitiveConverter.ToPoint(GetTransform(room.InternalElement).OfPoint(point)));
+                        }
+                        y = y + step;
+                    }
+
+                    x = x + step;
+                }
+            }
+
+
+            return grid;
+        }
+
+        private static DB.Transform GetTransform(DB.Element InternalElement)
+        {
+            if (InternalElement.Document.GetHashCode() == DocumentManager.Instance.CurrentDBDocument.GetHashCode())
+            {
+                return DB.Transform.Identity;
+            }
+            else
+            {
+                //Find the revit instance where we find the room
+                DB.FilteredElementCollector collector = new DB.FilteredElementCollector(DocumentManager.Instance.CurrentDBDocument);
+                List<DB.RevitLinkInstance> linkInstances = collector.OfCategory(DB.BuiltInCategory.OST_RvtLinks).WhereElementIsNotElementType().ToElements().Cast<DB.RevitLinkInstance>().ToList();
+                DB.RevitLinkInstance roomLinkInstance = linkInstances.FirstOrDefault();
+
+                foreach (DB.RevitLinkInstance linkInstance in linkInstances)
+                {
+                    if (linkInstance.GetLinkDocument().GetHashCode() == InternalElement.Document.GetHashCode())
+                    {
+                        roomLinkInstance = linkInstance;
+                        break;
+                    }
+                }
+
+                return roomLinkInstance.GetTotalTransform();
+            }
+        }
+
+        /// <summary>
+        /// Find the nearest level in the active document
+        /// </summary>
+        /// <param name="point">The reference point</param>
+        /// <returns></returns>
+        private static DB.Level GetNearestLevel(DB.XYZ point)
+        {
+            //find all level in the active document
+            DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
+
+            DB.FilteredElementCollector collector = new DB.FilteredElementCollector(doc);
+            List<DB.Level> activeLevels = collector.OfCategory(DB.BuiltInCategory.OST_Levels).WhereElementIsNotElementType().ToElements().Cast<DB.Level>().ToList();
+
+            DB.Level nearestLevel = activeLevels.FirstOrDefault();
+            double delta = Math.Abs(nearestLevel.ProjectElevation - point.Z);
+
+            foreach (DB.Level currentLevel in activeLevels)
+            {
+                if (Math.Abs(currentLevel.ProjectElevation - point.Z) < delta)
+                {
+                    nearestLevel = currentLevel;
+                    delta = Math.Abs(currentLevel.ProjectElevation - point.Z);
+                }
+            }
+
+            return nearestLevel;
+        }
 
         /// <summary>
         /// Retrive windows around the room
@@ -29,6 +137,33 @@ namespace DynamoMEP
         public static List<FamilyInstance>Doors(this Revit.Elements.Room room)
         {
             return BoundaryFamilyInstance(DB.BuiltInCategory.OST_Doors, room.InternalElement);
+        }
+
+        /// <summary>
+        /// Retrive room boundary elements
+        /// </summary>
+        public static List<Element> BoundaryElements(this Revit.Elements.Room room)
+        {
+            List<Element> output = new List<Element>();
+            DB.Document doc = room.InternalElement.Document;
+
+            foreach (DB.BoundarySegment segment in GetBoundarySegment(room.InternalElement))
+            {
+                DB.Element boundaryElement = doc.GetElement(segment.ElementId);
+                if (boundaryElement.GetType() == typeof(DB.RevitLinkInstance))
+                {
+                    DB.RevitLinkInstance linkInstance = boundaryElement as DB.RevitLinkInstance;
+                    DB.Element linkBoundaryElement = linkInstance.GetLinkDocument().GetElement(segment.LinkElementId);
+                    output.Add(ElementWrapper.ToDSType(linkBoundaryElement, true));
+                }
+                else
+                {
+                    output.Add(ElementWrapper.ToDSType(boundaryElement, true));
+                }
+            }
+
+            output = output.Distinct().ToList();
+            return output;
         }
 
         /// <summary>

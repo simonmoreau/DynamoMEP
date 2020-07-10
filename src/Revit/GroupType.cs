@@ -254,6 +254,32 @@ namespace DynamoMEP
             }
         }
 
+        /// <summary>
+        /// Get a GroupType
+        /// from its name
+        /// </summary>
+        /// <param name="name">The name of the group type</param>
+        /// <returns></returns>
+        public static GroupType FromName(string name)
+        {
+            DB.Document document = DocumentManager.Instance.CurrentDBDocument;
+
+            //Find all groupType in the document
+            DB.FilteredElementCollector collector = new DB.FilteredElementCollector(document);
+            List<DB.GroupType> groupTypes = collector.OfClass(typeof(DB.GroupType)).ToElements().Cast<DB.GroupType>().ToList();
+
+            DB.GroupType groupType = groupTypes.Where(g => g.Name == name).FirstOrDefault();
+            if (groupType !=null)
+            {
+                return new GroupType(groupType);
+            }
+            else
+            {
+                throw new ArgumentException("No group with this name was found.");
+            }
+
+        }
+
         #endregion
 
         //#region public properties

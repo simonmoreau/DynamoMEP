@@ -71,7 +71,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Revit\Group.cs" />
     <Compile Include="Revit\GroupType.cs" />
-    <Compile Include="Revit\Rooms.cs" />
+    <Compile Include="Revit\Room.cs" />
     <Compile Include="Revit\RoomSeparator.cs" />
     <Compile Include="Revit\Space.cs" />
     <Compile Include="Revit\SpaceSeparator.cs" />
@@ -86,6 +86,52 @@
     </Content>
     <Content Include="Resources\DynamoMEP.Group.FromElement.Large.png" />
     <Content Include="Resources\DynamoMEP.Group.FromElement.Small.png" />
+    <Content Include="Resources\DynamoMEP.Group.PlaceGroupInstance.Large.png" />
+    <Content Include="Resources\DynamoMEP.Group.PlaceGroupInstance.Small.png" />
+    <Content Include="Resources\DynamoMEP.GroupType.FromElement.Large.png" />
+    <Content Include="Resources\DynamoMEP.GroupType.FromElement.Small.png" />
+    <Content Include="Resources\DynamoMEP.GroupType.FromElements.Large.png" />
+    <Content Include="Resources\DynamoMEP.GroupType.FromElements.Small.png" />
+    <Content Include="Resources\DynamoMEP.GroupType.FromElementsAndName.Large.png" />
+    <Content Include="Resources\DynamoMEP.GroupType.FromElementsAndName.Small.png" />
+    <Content Include="Resources\DynamoMEP.GroupType.FromName.Large.png" />
+    <Content Include="Resources\DynamoMEP.GroupType.FromName.Small.png" />
+    <Content Include="Resources\DynamoMEP.Room.BoundaryElements.Large.png" />
+    <Content Include="Resources\DynamoMEP.Room.BoundaryElements.Small.png" />
+    <Content Include="Resources\DynamoMEP.Room.ByPoint.Large.png" />
+    <Content Include="Resources\DynamoMEP.Room.ByPoint.Small.png" />
+    <Content Include="Resources\DynamoMEP.Room.Doors.Large.png" />
+    <Content Include="Resources\DynamoMEP.Room.Doors.Small.png" />
+    <Content Include="Resources\DynamoMEP.Room.Grid.Large.png" />
+    <Content Include="Resources\DynamoMEP.Room.Grid.Small.png" />
+    <Content Include="Resources\DynamoMEP.Room.Windows.Large.png" />
+    <Content Include="Resources\DynamoMEP.Room.Windows.Small.png" />
+    <Content Include="Resources\DynamoMEP.RoomSeparator.ByCurve.Large.png" />
+    <Content Include="Resources\DynamoMEP.RoomSeparator.ByCurve.Small.png" />
+    <Content Include="Resources\DynamoMEP.RoomSeparator.ByCurveAndView.Large.png" />
+    <Content Include="Resources\DynamoMEP.RoomSeparator.ByCurveAndView.Small.png" />
+    <Content Include="Resources\DynamoMEP.Space.BoundaryElements.Large.png" />
+    <Content Include="Resources\DynamoMEP.Space.BoundaryElements.Small.png" />
+    <Content Include="Resources\DynamoMEP.Space.ByPoint.Large.png" />
+    <Content Include="Resources\DynamoMEP.Space.ByPoint.Small.png" />
+    <Content Include="Resources\DynamoMEP.Space.ByPointAndLevel.Large.png" />
+    <Content Include="Resources\DynamoMEP.Space.ByPointAndLevel.Small.png" />
+    <Content Include="Resources\DynamoMEP.Space.FromElement.Large.png" />
+    <Content Include="Resources\DynamoMEP.Space.FromElement.Small.png" />
+    <Content Include="Resources\DynamoMEP.Space.GetIdentificationData.Large.png" />
+    <Content Include="Resources\DynamoMEP.Space.GetIdentificationData.Small.png" />
+    <Content Include="Resources\DynamoMEP.Space.Grid.Large.png" />
+    <Content Include="Resources\DynamoMEP.Space.Grid.Small.png" />
+    <Content Include="Resources\DynamoMEP.Space.IsInSpace.Large.png" />
+    <Content Include="Resources\DynamoMEP.Space.IsInSpace.Small.png" />
+    <Content Include="Resources\DynamoMEP.Space.Level.Large.png" />
+    <Content Include="Resources\DynamoMEP.Space.Level.Small.png" />
+    <Content Include="Resources\DynamoMEP.Space.LocationPoint.Large.png" />
+    <Content Include="Resources\DynamoMEP.Space.LocationPoint.Small.png" />
+    <Content Include="Resources\DynamoMEP.SpaceSeparator.ByCurve.Large.png" />
+    <Content Include="Resources\DynamoMEP.SpaceSeparator.ByCurve.Small.png" />
+    <Content Include="Resources\DynamoMEP.SpaceSeparator.ByCurveAndView.Large.png" />
+    <Content Include="Resources\DynamoMEP.SpaceSeparator.ByCurveAndView.Small.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DynamoMEPImages.resx" />
@@ -101,6 +147,7 @@ set binpath="$(AppData)\Dynamo\Dynamo Revit\2.5\packages\$(ProjectName)\bin\"
 
 echo %25binpath%25
 
+copy "$(TargetDir)*.customization.dll" %25binpath%25
 copy "$(TargetDir)*.dll" %25binpath%25
 copy "$(TargetDir)*.xml" %25binpath%25
 copy "$(ProjectDir)pkg.json" %25packagePath%25

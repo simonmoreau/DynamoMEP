@@ -72,7 +72,9 @@
     <Compile Include="Revit\Group.cs" />
     <Compile Include="Revit\GroupType.cs" />
     <Compile Include="Revit\Rooms.cs" />
+    <Compile Include="Revit\RoomSeparator.cs" />
     <Compile Include="Revit\Space.cs" />
+    <Compile Include="Revit\SpaceSeparator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -189,12 +189,6 @@ namespace DynamoMEP
         /// <returns></returns>
         public static Space ByPointAndLevel(Point point, Level level)
         {
-            //Check if the level is in the document
-            if (level.InternalElement.Document != DocumentManager.Instance.CurrentDBDocument)
-            {
-                throw new ArgumentException("The level does not exist in the given document");
-            }
-
             DB.Level revitLevel = level.InternalElement as DB.Level;
             DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
 

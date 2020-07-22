@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Revit\FamillyInstance.cs" />
     <Compile Include="Revit\Group.cs" />
     <Compile Include="Revit\GroupType.cs" />
     <Compile Include="Revit\Room.cs" />
@@ -135,6 +136,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DynamoMEPImages.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DynamoMEP.UI\DynamoMEP.UI.csproj">
+      <Project>{52b736f1-3bd9-47c7-a3e8-3a801dfb02c0}</Project>
+      <Name>DynamoMEP.UI</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

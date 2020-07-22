@@ -9,6 +9,7 @@ using Autodesk.DesignScript.Geometry;
 using RevitServices.Persistence;
 using Revit.GeometryConversion;
 using RevitServices.Transactions;
+using Autodesk.DesignScript.Runtime;
 
 namespace DynamoMEP
 {
@@ -29,30 +30,36 @@ namespace DynamoMEP
 
             DB.FamilyInstance revitFamilyInstance = familyInstance.InternalElement as DB.FamilyInstance;
 
-            DB.FamilyInstanceReferenceType familyInstanceReferenceTypeEnum = (DB.FamilyInstanceReferenceType)Enum.Parse(typeof(DB.FamilyInstanceReferenceType), familyInstanceReferenceType);
-
-            List<DB.Reference> references = revitFamilyInstance.GetReferences(familyInstanceReferenceTypeEnum).ToList();
-
-            // This creates a new wall and deletes the old one
-            TransactionManager.Instance.EnsureInTransaction(activeDocument);
-
-            using (DB.SubTransaction subTr = new DB.SubTransaction(activeDocument))
+            if (familyInstanceReferenceType != null)
             {
-                subTr.Start();
+                DB.FamilyInstanceReferenceType familyInstanceReferenceTypeEnum;
 
-                foreach (DB.Reference reference in references)
+                if (Enum.TryParse<DB.FamilyInstanceReferenceType>(familyInstanceReferenceType, out familyInstanceReferenceTypeEnum))
                 {
-                    DB.SketchPlane sketchPlane = DB.SketchPlane.Create(activeDocument, reference);
-                    planes.Add(sketchPlane.GetPlane().ToPlane());
-                    sketchPlane.Dispose();
+                    List<DB.Reference> references = revitFamilyInstance.GetReferences(familyInstanceReferenceTypeEnum).ToList();
+
+                    // This creates a new wall and deletes the old one
+                    TransactionManager.Instance.EnsureInTransaction(activeDocument);
+
+                    using (DB.SubTransaction subTr = new DB.SubTransaction(activeDocument))
+                    {
+                        subTr.Start();
+
+                        foreach (DB.Reference reference in references)
+                        {
+                            DB.SketchPlane sketchPlane = DB.SketchPlane.Create(activeDocument, reference);
+                            planes.Add(sketchPlane.GetPlane().ToPlane());
+                            sketchPlane.Dispose();
+                        }
+
+                        subTr.RollBack();
+                    }
+
+                    TransactionManager.Instance.TransactionTaskDone();
+
                 }
 
-                subTr.RollBack();
             }
-
-
-
-            TransactionManager.Instance.TransactionTaskDone();
 
             return planes;
         }
@@ -64,6 +71,7 @@ namespace DynamoMEP
         public static List<Plane> GetReferencesPlanes(Revit.Elements.FamilyInstance familyInstance)
         {
             List<Plane> planes = new List<Plane>();
+            List<string> names = new List<string>();
             DB.Document activeDocument = RevitServices.Persistence.DocumentManager.Instance.CurrentDBDocument;
 
             DB.FamilyInstance revitFamilyInstance = familyInstance.InternalElement as DB.FamilyInstance;
@@ -96,6 +104,33 @@ namespace DynamoMEP
 
 
             return planes;
+        }
+
+
+        /// <summary>
+        /// Return all references names
+        /// </summary>
+        /// <param name="familyInstance">The family instance</param>
+        public static List<string> GetReferencesNames(Revit.Elements.FamilyInstance familyInstance)
+        {
+            List<string> names = new List<string>();
+            DB.Document activeDocument = RevitServices.Persistence.DocumentManager.Instance.CurrentDBDocument;
+
+            DB.FamilyInstance revitFamilyInstance = familyInstance.InternalElement as DB.FamilyInstance;
+
+            DB.FamilyInstanceReferenceType[] familyInstanceReferenceTypes = Enum.GetValues(typeof(DB.FamilyInstanceReferenceType)).Cast<DB.FamilyInstanceReferenceType>().ToArray();
+
+            foreach (DB.FamilyInstanceReferenceType familyInstanceReferenceType in familyInstanceReferenceTypes)
+            {
+                List<DB.Reference> references = revitFamilyInstance.GetReferences(familyInstanceReferenceType).ToList();
+
+                foreach (DB.Reference reference in references)
+                {
+                    names.Add(revitFamilyInstance.GetReferenceName(reference));
+                }
+            }
+
+            return names;
         }
 
 

@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoMEP", "DynamoMEP.csproj", "{586CF0AD-244E-4F1E-A461-48F125B8E1FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoMEP.UI", "..\DynamoMEP.UI\DynamoMEP.UI.csproj", "{52B736F1-3BD9-47C7-A3E8-3A801DFB02C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{586CF0AD-244E-4F1E-A461-48F125B8E1FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{586CF0AD-244E-4F1E-A461-48F125B8E1FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{586CF0AD-244E-4F1E-A461-48F125B8E1FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52B736F1-3BD9-47C7-A3E8-3A801DFB02C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52B736F1-3BD9-47C7-A3E8-3A801DFB02C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52B736F1-3BD9-47C7-A3E8-3A801DFB02C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52B736F1-3BD9-47C7-A3E8-3A801DFB02C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {81F8CB22-3127-4FC2-BB6C-572F42B92864}
 	EndGlobalSection
 EndGlobal

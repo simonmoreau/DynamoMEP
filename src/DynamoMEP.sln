@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoMEP", "DynamoMEP.csproj", "{586CF0AD-244E-4F1E-A461-48F125B8E1FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoMEP.UI", "..\DynamoMEP.UI\DynamoMEP.UI.csproj", "{52B736F1-3BD9-47C7-A3E8-3A801DFB02C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoMEPUI", "..\DynamoMEP.UI\DynamoMEPUI.csproj", "{52B736F1-3BD9-47C7-A3E8-3A801DFB02C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

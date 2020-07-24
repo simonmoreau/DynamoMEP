@@ -16,6 +16,6 @@
   "contains_binaries": true,
   "node_libraries": [
     "DynamoMEP, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "DynamoMEP.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    "DynamoMEPUI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
   ]
 }

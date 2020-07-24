@@ -70,7 +70,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Revit\Area.cs" />
-    <Compile Include="Revit\AreaSeparator.cs" />
+    <Compile Include="Revit\AreaBoundary.cs" />
     <Compile Include="Revit\FamillyInstance.cs" />
     <Compile Include="Revit\Group.cs" />
     <Compile Include="Revit\GroupType.cs" />
@@ -87,6 +87,30 @@
     <Content Include="DynamoMEP_DynamoCustomization.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\DynamoMEP.Area.BoundaryElements.Large.png" />
+    <Content Include="Resources\DynamoMEP.Area.BoundaryElements.Small.png" />
+    <Content Include="Resources\DynamoMEP.Area.ByPointAndView.Large.png" />
+    <Content Include="Resources\DynamoMEP.Area.ByPointAndView.Small.png" />
+    <Content Include="Resources\DynamoMEP.Area.FromElement.Large.png" />
+    <Content Include="Resources\DynamoMEP.Area.FromElement.Small.png" />
+    <Content Include="Resources\DynamoMEP.Area.GetIdentificationData.Large.png" />
+    <Content Include="Resources\DynamoMEP.Area.GetIdentificationData.Small.png" />
+    <Content Include="Resources\DynamoMEP.Area.Level.Large.png" />
+    <Content Include="Resources\DynamoMEP.Area.Level.Small.png" />
+    <Content Include="Resources\DynamoMEP.Area.LocationPoint.Large.png" />
+    <Content Include="Resources\DynamoMEP.Area.LocationPoint.Small.png" />
+    <Content Include="Resources\DynamoMEP.AreaBoundary.ByCurve.Large.png" />
+    <Content Include="Resources\DynamoMEP.AreaBoundary.ByCurve.Small.png" />
+    <Content Include="Resources\DynamoMEP.AreaBoundary.ByCurveAndView.Large.png" />
+    <Content Include="Resources\DynamoMEP.AreaBoundary.ByCurveAndView.Small.png" />
+    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencePlaneByName.Large.png" />
+    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencePlaneByName.Small.png" />
+    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesNames.Large.png" />
+    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesNames.Small.png" />
+    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesPlanes.Large.png" />
+    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesPlanes.Small.png" />
+    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesPlanesByType.Large.png" />
+    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesPlanesByType.Small.png" />
     <Content Include="Resources\DynamoMEP.Group.FromElement.Large.png" />
     <Content Include="Resources\DynamoMEP.Group.FromElement.Small.png" />
     <Content Include="Resources\DynamoMEP.Group.PlaceGroupInstance.Large.png" />
@@ -135,16 +159,20 @@
     <Content Include="Resources\DynamoMEP.SpaceSeparator.ByCurve.Small.png" />
     <Content Include="Resources\DynamoMEP.SpaceSeparator.ByCurveAndView.Large.png" />
     <Content Include="Resources\DynamoMEP.SpaceSeparator.ByCurveAndView.Small.png" />
+    <Content Include="Resources\DynamoMEP.UI.FamilyInstanceReferenceTypeDropDown.Large.png" />
+    <Content Include="Resources\DynamoMEP.UI.FamilyInstanceReferenceTypeDropDown.Small.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DynamoMEPImages.resx" />
+    <EmbeddedResource Include="DynamoMEPUIImages.resx" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DynamoMEP.UI\DynamoMEP.UI.csproj">
+    <ProjectReference Include="..\DynamoMEP.UI\DynamoMEPUI.csproj">
       <Project>{52b736f1-3bd9-47c7-a3e8-3a801dfb02c0}</Project>
-      <Name>DynamoMEP.UI</Name>
+      <Name>DynamoMEPUI</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>set SolutionName=DynamoMEP
@@ -187,6 +215,8 @@ copy "$(ProjectDir)pkg.json" %25packagePath%25
     <!-- Generate customization dll -->
     <GenerateResource SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)" UseSourcePath="true" Sources="$(ProjectDir)\DynamoMEPImages.resx" OutputResources="$(ProjectDir)\Resources\DynamoMEPImages.resources" References="$(FrameworkAssembliesPath)System.Drawing.dll" />
     <AL SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)" TargetType="library" EmbedResources="$(ProjectDir)\Resources\DynamoMEPImages.resources" OutputAssembly="$(OutDir)DynamoMEP.customization.dll" Version="%(AssemblyInfo.Version)" />
+    <GenerateResource SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)" UseSourcePath="true" Sources="$(ProjectDir)\DynamoMEPUIImages.resx" OutputResources="$(ProjectDir)\Resources\DynamoMEPUIImages.resources" References="$(FrameworkAssembliesPath)System.Drawing.dll" />
+    <AL SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)" TargetType="library" EmbedResources="$(ProjectDir)\Resources\DynamoMEPUIImages.resources" OutputAssembly="$(OutDir)DynamoMEPUI.customization.dll" Version="%(AssemblyInfo.Version)" />
   </Target>
   <!---->
 </Project>

@@ -65,7 +65,7 @@ namespace DynamoMEP
         }
 
         /// <summary>
-        /// Return all references plane
+        /// Return all references planes
         /// </summary>
         /// <param name="familyInstance">The family instance</param>
         public static List<Plane> GetReferencesPlanes(Revit.Elements.FamilyInstance familyInstance)
@@ -136,7 +136,7 @@ namespace DynamoMEP
 
 
         /// <summary>
-        /// Return a plane aligned with the named references
+        /// Return a plane aligned with the named reference
         /// </summary>
         /// <param name="familyInstance">The family instance</param>
         /// <param name="name">The name of the reference</param>

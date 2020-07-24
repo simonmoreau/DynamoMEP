@@ -15,18 +15,18 @@ using Plane = Autodesk.Revit.DB.Plane;
 namespace DynamoMEP
 {
     /// <summary>
-    /// A Revit Space Separator
+    /// A Revit Area boundary line
     /// </summary>
     [DynamoServices.RegisterForTrace]
-    public class AreaSeparator : Revit.Elements.CurveElement
+    public class AreaBoundary : Revit.Elements.CurveElement
     {
         #region Private constructors
 
         /// <summary>
-        /// Construct a space Separator from the document.  The result is Dynamo owned
+        /// Construct an area boundary line from the document.  The result is Dynamo owned
         /// </summary>
         /// <param name="curve"></param>
-        private AreaSeparator(Autodesk.Revit.DB.ModelCurve curve)
+        private AreaBoundary(Autodesk.Revit.DB.ModelCurve curve)
         {
             SafeInit(() => InitModelCurve(curve));
         }
@@ -41,7 +41,7 @@ namespace DynamoMEP
         /// <param name="crv"></param>
         /// <param name="makeReferenceCurve"></param>
         /// <param name="view"></param>
-        private AreaSeparator(Autodesk.Revit.DB.Curve crv, bool makeReferenceCurve, ViewPlan view)
+        private AreaBoundary(Autodesk.Revit.DB.Curve crv, bool makeReferenceCurve, ViewPlan view)
         {
             SafeInit(() => InitModelCurve(crv, makeReferenceCurve, view));
         }
@@ -51,7 +51,7 @@ namespace DynamoMEP
         #region Helpers for private constructors
 
         /// <summary>
-        /// Initialize a SpaceSeparator element
+        /// Initialize an area boundary element
         /// </summary>
         /// <param name="curve"></param>
         private void InitModelCurve(Autodesk.Revit.DB.ModelCurve curve)
@@ -81,7 +81,7 @@ namespace DynamoMEP
         {
             if (Document.IsFamilyDocument)
             {
-                throw new ArgumentException("You cannot create an Area Separator in a familly document");
+                throw new ArgumentException("You cannot create an Area Boundary line in a familly document");
             }
             //Phase 1 - Check to see if the object exists and should be rebound
             var mc =
@@ -186,11 +186,11 @@ namespace DynamoMEP
         #region Public constructor
 
         /// <summary>
-        /// Construct a Revit Area Separator element from a Curve. The curve will be project onto the Revit active view. The active view must be an Area plan view.
+        /// Construct a Revit Area Boundary element from a Curve. The curve will be project onto the Revit active view. The active view must be an Area plan view.
         /// </summary>
         /// <param name="curve"></param>
         /// <returns></returns>
-        public static AreaSeparator ByCurve(Autodesk.DesignScript.Geometry.Curve curve)
+        public static AreaBoundary ByCurve(Autodesk.DesignScript.Geometry.Curve curve)
         {
             if (curve == null)
             {
@@ -202,7 +202,7 @@ namespace DynamoMEP
 
             if (currentView.ViewType != ViewType.AreaPlan)
             {
-                throw new ArgumentException("Please open an Area plan wiew to create area separation lines");
+                throw new ArgumentException("Please open an Area plan wiew to create area boundary lines");
             }
             else
             {
@@ -211,22 +211,22 @@ namespace DynamoMEP
 
             if (viewPlan == null)
             {
-                throw new ArgumentException("Please open an Area plan wiew to create area separation lines");
+                throw new ArgumentException("Please open an Area plan wiew to create area boundary lines");
             }
 
             Plane viewPlane = currentView.SketchPlane.GetPlane();
             Autodesk.DesignScript.Geometry.Curve projectedCurve = curve.PullOntoPlane(viewPlane.ToPlane());
 
-            return new AreaSeparator(ExtractLegalRevitCurve(projectedCurve), false, viewPlan);
+            return new AreaBoundary(ExtractLegalRevitCurve(projectedCurve), false, viewPlan);
         }
 
         /// <summary>
-        /// Construct a Revit Area Separator element from a Curve and a base plan view
+        /// Construct a Revit Area Boundary element from a Curve and a base plan view
         /// </summary>
         /// <param name="curve"></param>
         /// <param name="view"></param>
         /// <returns></returns>
-        public static AreaSeparator ByCurveAndView(Autodesk.DesignScript.Geometry.Curve curve, Revit.Elements.Views.AreaPlanView view)
+        public static AreaBoundary ByCurveAndView(Autodesk.DesignScript.Geometry.Curve curve, Revit.Elements.Views.AreaPlanView view)
         {
             if (curve == null)
             {
@@ -242,13 +242,13 @@ namespace DynamoMEP
 
             if (currentView.ViewType != ViewType.AreaPlan)
             {
-                throw new ArgumentException("Please use an area plan view to create space separation lines");
+                throw new ArgumentException("Please use an Area plan view to create space boundary lines");
             }
 
             Plane viewPlane = currentView.SketchPlane.GetPlane();
             Autodesk.DesignScript.Geometry.Curve projectedCurve = curve.PullOntoPlane(viewPlane.ToPlane());
 
-            return new AreaSeparator(ExtractLegalRevitCurve(projectedCurve), false, currentView);
+            return new AreaBoundary(ExtractLegalRevitCurve(projectedCurve), false, currentView);
         }
 
         #endregion
@@ -260,9 +260,9 @@ namespace DynamoMEP
         /// <param name="modelCurve"></param>
         /// <param name="isRevitOwned"></param>
         /// <returns></returns>
-        internal static AreaSeparator FromExisting(Autodesk.Revit.DB.ModelCurve modelCurve, bool isRevitOwned)
+        internal static AreaBoundary FromExisting(Autodesk.Revit.DB.ModelCurve modelCurve, bool isRevitOwned)
         {
-            return new AreaSeparator(modelCurve);
+            return new AreaBoundary(modelCurve);
         }
 
         #endregion
@@ -335,7 +335,7 @@ namespace DynamoMEP
 
         public override string ToString()
         {
-            return "Area Separator";
+            return "Area Boundary";
         }
     }
 }

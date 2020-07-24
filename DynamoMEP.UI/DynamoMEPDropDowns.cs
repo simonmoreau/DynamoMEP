@@ -15,9 +15,9 @@ namespace DynamoMEP.UI
     [NodeCategory("DynamoMEP.FamillyInstance")]
     [NodeDescription("Select the type of reference")]
     [IsDesignScriptCompatible]
-    public class CoordinateSystem : DSDropDownBase
+    public class FamilyInstanceReferenceTypeDropDown : DSDropDownBase
     {
-        public CoordinateSystem() : base(">") { }
+        public FamilyInstanceReferenceTypeDropDown() : base(">") { }
 
         protected override SelectionState PopulateItemsCore(string currentSelection)
         {

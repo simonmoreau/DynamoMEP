@@ -126,7 +126,7 @@ namespace DynamoMEP
         /// <summary>
         /// Retrive windows around the room
         /// </summary>
-        public static List<FamilyInstance> Windows(this Revit.Elements.Room room)
+        public static List<Revit.Elements.FamilyInstance> Windows(this Revit.Elements.Room room)
         {
             return BoundaryFamilyInstance(DB.BuiltInCategory.OST_Windows, room.InternalElement);
         }
@@ -134,7 +134,7 @@ namespace DynamoMEP
         /// <summary>
         /// Retrive Doors around the room
         /// </summary>
-        public static List<FamilyInstance>Doors(this Revit.Elements.Room room)
+        public static List<Revit.Elements.FamilyInstance>Doors(this Revit.Elements.Room room)
         {
             return BoundaryFamilyInstance(DB.BuiltInCategory.OST_Doors, room.InternalElement);
         }
@@ -173,9 +173,9 @@ namespace DynamoMEP
         /// <param name="cat">The category of hosted elements</param>
         /// <param name="internalElement">The room Revit element</param>
         /// <returns></returns>
-        private static List<FamilyInstance> BoundaryFamilyInstance(DB.BuiltInCategory cat, DB.Element internalElement)
+        private static List<Revit.Elements.FamilyInstance> BoundaryFamilyInstance(DB.BuiltInCategory cat, DB.Element internalElement)
         {
-            List<FamilyInstance> output = new List<FamilyInstance>();
+            List<Revit.Elements.FamilyInstance> output = new List<Revit.Elements.FamilyInstance>();
 
             //the document of the room
             DB.Document doc = internalElement.Document; // DocumentManager.Instance.CurrentDBDocument;
@@ -225,7 +225,7 @@ namespace DynamoMEP
                 {
                     if (boundaryFamilyInstance.get_FromRoom(familyInstancePhase).Id == internalElement.Id)
                     {
-                        output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as FamilyInstance);
+                        output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as Revit.Elements.FamilyInstance);
                         continue;
                     }
                 }
@@ -234,7 +234,7 @@ namespace DynamoMEP
                 {
                     if (boundaryFamilyInstance.get_ToRoom(familyInstancePhase).Id == internalElement.Id)
                     {
-                        output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as FamilyInstance);
+                        output.Add(ElementWrapper.ToDSType(boundaryFamilyInstance, true) as Revit.Elements.FamilyInstance);
                     }
                 }
             }

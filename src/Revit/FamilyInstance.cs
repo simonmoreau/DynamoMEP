@@ -14,9 +14,9 @@ using Autodesk.DesignScript.Runtime;
 namespace DynamoMEP
 {
     /// <summary>
-    /// Revit Rooms
+    /// Revit FamilyInstance
     /// </summary>
-    public static class FamillyInstance
+    public static class FamilyInstance
     {
         /// <summary>
         /// Return all planes aligned with the selected references

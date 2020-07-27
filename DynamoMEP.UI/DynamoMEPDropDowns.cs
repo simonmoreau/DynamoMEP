@@ -12,7 +12,7 @@ using Autodesk.Revit.DB;
 namespace DynamoMEP.UI
 {
     [NodeName("FamilyInstanceReferenceType")]
-    [NodeCategory("DynamoMEP.FamillyInstance")]
+    [NodeCategory("DynamoMEP.FamilyInstance")]
     [NodeDescription("Select the type of reference")]
     [IsDesignScriptCompatible]
     public class FamilyInstanceReferenceTypeDropDown : DSDropDownBase

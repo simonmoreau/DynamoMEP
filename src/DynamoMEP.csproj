@@ -72,7 +72,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Revit\Area.cs" />
     <Compile Include="Revit\AreaBoundary.cs" />
-    <Compile Include="Revit\FamillyInstance.cs" />
+    <Compile Include="Revit\FamilyInstance.cs" />
     <Compile Include="Revit\Group.cs" />
     <Compile Include="Revit\GroupType.cs" />
     <Compile Include="Revit\Room.cs" />
@@ -106,14 +106,14 @@
     <Content Include="Resources\DynamoMEP.AreaBoundary.ByCurve.Small.png" />
     <Content Include="Resources\DynamoMEP.AreaBoundary.ByCurveAndView.Large.png" />
     <Content Include="Resources\DynamoMEP.AreaBoundary.ByCurveAndView.Small.png" />
-    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencePlaneByName.Large.png" />
-    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencePlaneByName.Small.png" />
-    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesNames.Large.png" />
-    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesNames.Small.png" />
-    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesPlanes.Large.png" />
-    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesPlanes.Small.png" />
-    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesPlanesByType.Large.png" />
-    <Content Include="Resources\DynamoMEP.FamillyInstance.GetReferencesPlanesByType.Small.png" />
+    <Content Include="Resources\DynamoMEP.FamilyInstance.GetReferencePlaneByName.Large.png" />
+    <Content Include="Resources\DynamoMEP.FamilyInstance.GetReferencePlaneByName.Small.png" />
+    <Content Include="Resources\DynamoMEP.FamilyInstance.GetReferencesNames.Large.png" />
+    <Content Include="Resources\DynamoMEP.FamilyInstance.GetReferencesNames.Small.png" />
+    <Content Include="Resources\DynamoMEP.FamilyInstance.GetReferencesPlanes.Large.png" />
+    <Content Include="Resources\DynamoMEP.FamilyInstance.GetReferencesPlanes.Small.png" />
+    <Content Include="Resources\DynamoMEP.FamilyInstance.GetReferencesPlanesByType.Large.png" />
+    <Content Include="Resources\DynamoMEP.FamilyInstance.GetReferencesPlanesByType.Small.png" />
     <Content Include="Resources\DynamoMEP.Group.FromElement.Large.png" />
     <Content Include="Resources\DynamoMEP.Group.FromElement.Small.png" />
     <Content Include="Resources\DynamoMEP.Group.PlaceGroupInstance.Large.png" />
@@ -166,7 +166,9 @@
     <Content Include="Resources\DynamoMEP.UI.FamilyInstanceReferenceTypeDropDown.Small.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DynamoMEPImages.resx" />
+    <EmbeddedResource Include="DynamoMEPImages.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="DynamoMEPUIImages.resx" />
   </ItemGroup>
   <ItemGroup>

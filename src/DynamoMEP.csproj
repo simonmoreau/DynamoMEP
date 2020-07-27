@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="About.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Revit\Area.cs" />
     <Compile Include="Revit\AreaBoundary.cs" />
@@ -87,6 +88,8 @@
     <Content Include="DynamoMEP_DynamoCustomization.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\DynamoMEP.About.AboutDynamoMEP.Large.png" />
+    <Content Include="Resources\DynamoMEP.About.AboutDynamoMEP.Small.png" />
     <Content Include="Resources\DynamoMEP.Area.BoundaryElements.Large.png" />
     <Content Include="Resources\DynamoMEP.Area.BoundaryElements.Small.png" />
     <Content Include="Resources\DynamoMEP.Area.ByPointAndView.Large.png" />
@@ -178,6 +181,8 @@
     <PostBuildEvent>set SolutionName=DynamoMEP
 set SigntoolPath="C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe"
 call %25SigntoolPath%25 sign /sha1 3b428f7d77548f2f10a204bd551da1c3ede7c0e7 /d "%25SolutioName%25" /du "http://www.eai.fr" /t "http://timestamp.comodoca.com/authenticode" /fd sha256 "$(TargetPath)"
+call %25SigntoolPath%25 sign /sha1 3b428f7d77548f2f10a204bd551da1c3ede7c0e7 /d "%25SolutioName%25" /du "http://www.eai.fr" /t "http://timestamp.comodoca.com/authenticode" /fd sha256 "$(TargetDir)$(ProjectName).customization.dll"
+call %25SigntoolPath%25 sign /sha1 3b428f7d77548f2f10a204bd551da1c3ede7c0e7 /d "%25SolutioName%25" /du "http://www.eai.fr" /t "http://timestamp.comodoca.com/authenticode" /fd sha256 "$(TargetDir)$(ProjectName)UI.customization.dll"
 
 set packagePath="$(AppData)\Dynamo\Dynamo Revit\2.5\packages\$(ProjectName)"
 set binpath="$(AppData)\Dynamo\Dynamo Revit\2.5\packages\$(ProjectName)\bin\"
@@ -187,9 +192,7 @@ echo %25binpath%25
 copy "$(TargetDir)*.customization.dll" %25binpath%25
 copy "$(TargetDir)*.dll" %25binpath%25
 copy "$(TargetDir)*.xml" %25binpath%25
-copy "$(ProjectDir)pkg.json" %25packagePath%25
-
-</PostBuildEvent>
+copy "$(ProjectDir)pkg.json" %25packagePath%25</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

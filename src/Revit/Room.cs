@@ -189,17 +189,22 @@ namespace DynamoMEP
             foreach (DB.BoundarySegment segment in boundarySegments)
             {
                 DB.Element boundaryElement = doc.GetElement(segment.ElementId);
-                if (boundaryElement.GetType() == typeof(DB.RevitLinkInstance))
+
+                if (boundaryElement != null)
                 {
-                    DB.RevitLinkInstance linkInstance = boundaryElement as DB.RevitLinkInstance;
-                    boundaryDocuments.Add(linkInstance.GetLinkDocument());
-                    boundaryElements.Add(segment.LinkElementId);
+                    if (boundaryElement.GetType() == typeof(DB.RevitLinkInstance))
+                    {
+                        DB.RevitLinkInstance linkInstance = boundaryElement as DB.RevitLinkInstance;
+                        boundaryDocuments.Add(linkInstance.GetLinkDocument());
+                        boundaryElements.Add(segment.LinkElementId);
+                    }
+                    else
+                    {
+                        boundaryDocuments.Add(doc);
+                        boundaryElements.Add(segment.ElementId);
+                    }
                 }
-                else
-                {
-                    boundaryDocuments.Add(doc);
-                    boundaryElements.Add(segment.ElementId);
-                }
+
             }
 
             // Create a category filter

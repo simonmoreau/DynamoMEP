@@ -2,19 +2,26 @@
   "license": "",
   "file_hash": null,
   "name": "DynamoMEP",
-  "version": "0.0.2",
-  "description": "MEP nodes for Dynamo.",
+  "version": "1.0.1",
+  "description": "DynamoMEP is a package for working with MEP elements, Rooms and Spaces.",
   "group": "",
-  "keywords": null,
+  "keywords": [
+    "mep",
+    "room",
+    "space"
+  ],
   "dependencies": [],
+  "host_dependencies": [],
   "contents": "",
-  "engine_version": "2.6.0.0",
+  "engine_version": "2.5.0.7586",
   "engine": "dynamo",
   "engine_metadata": "",
-  "site_url": "",
-  "repository_url": "",
+  "site_url": "https://www.bim42.com/2020/08/dynamomep-update",
+  "repository_url": "https://github.com/simonmoreau/DynamoMEP",
   "contains_binaries": true,
   "node_libraries": [
+    "DynamoMEP, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "DynamoMEPUI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
     "DynamoMEP, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
     "DynamoMEPUI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
   ]

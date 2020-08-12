@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
+using Newtonsoft.Json;
+
 
 namespace DynamoMEP.UI
 {
@@ -15,26 +17,35 @@ namespace DynamoMEP.UI
     [NodeCategory("DynamoMEP.FamilyInstance")]
     [NodeDescription("Select the type of reference")]
     [IsDesignScriptCompatible]
-    public class FamilyInstanceReferenceTypeDropDown : DSDropDownBase
+    public class FamilyInstanceReferenceTypeDropDown : EnumBase<FamilyInstanceReferenceType>
     {
-        public FamilyInstanceReferenceTypeDropDown() : base(">") { }
+        public FamilyInstanceReferenceTypeDropDown()
+        {
+            var existing = OutPorts[0];
+            OutPorts[0] = new PortModel(PortType.Output, this,
+                new PortData(">", "The selected family reference type" , existing.DefaultValue));
+            OutPorts[0].GUID = existing.GUID;
+        }
+
+        [JsonConstructor]
+        public FamilyInstanceReferenceTypeDropDown(IEnumerable<PortModel> inPorts, IEnumerable<PortModel> outPorts) : base(inPorts, outPorts)
+        {
+            // TODO verify additional information for output ports is not required here!
+        }
 
         protected override SelectionState PopulateItemsCore(string currentSelection)
         {
             //clear items
             Items.Clear();
 
-            //set up the collection
-            var newItems = new List<DynamoDropDownItem>();
-            foreach (var j in Enum.GetValues(typeof(FamilyInstanceReferenceType)))
+            foreach (FamilyInstanceReferenceType familyInstanceReferenceType in Enum.GetValues(typeof(FamilyInstanceReferenceType)))
             {
-                newItems.Add(new DynamoDropDownItem(j.ToString(), j.ToString()));
+                Items.Add(new DynamoDropDownItem(familyInstanceReferenceType.ToString(), familyInstanceReferenceType.ToString()));
             }
-            Items.AddRange(newItems);
 
-            //set the selected index to 0
+            Items = Items.OrderBy(x => x.Name).ToObservableCollection();
             SelectedIndex = 0;
-            return SelectionState.Done;
+            return SelectionState.Restore;
         }
         public override IEnumerable<AssociativeNode> BuildOutputAst(List<AssociativeNode> inputAstNodes)
         {

@@ -1,10 +1,10 @@
 
-<p align="center"><img width=12.5% src="https://raw.githubusercontent.com/simonmoreau/DynamoMEP/master/AlignTag/Resources/AlignAppIcon.png"></p>
+<p align="center"><img width=12.5% src="https://github.com/simonmoreau/DynamoMEP/blob/master/assets/DynamoMEP.About.AboutDynamoMEP.Large.png"></p>
 <h1 align="center">
   DynamoMEP
 </h1>
 
-<h4 align="center">A Dynamo packae for MEP elements</h4>
+<h4 align="center">A Dynamo package for MEP elements</h4>
 
 # Overview
 
@@ -14,7 +14,7 @@ DynamoMEP is an Open-Source project available on github and Dynamo’s package m
 
 The project is being developed in C# using Visual Studio, and will work with Dynamo 2.0 and forward, and Revit 2016 and forward. The project mostly consists of zero-touch nodes with a few custom ones.
 
-![Overview](https://raw.githubusercontent.com/simonmoreau/DynamoMEP/master/AlignTag/Resources/alignTags.gif)
+![Overview](https://github.com/simonmoreau/DynamoMEP/blob/master/assets/sample.png)
 
 ## Installation
 

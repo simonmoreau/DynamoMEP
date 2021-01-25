@@ -17,14 +17,14 @@ namespace DynamoMEP
     /// MEP Spaces
     /// </summary>
     [DynamoServices.RegisterForTrace]
-    public class Space : Element
+    public class Area : Element
     {
         #region Internal Properties
 
         /// <summary>
         /// Internal reference to the Revit Element
         /// </summary>
-        internal DB.Mechanical.Space InternalSpace
+        internal DB.Area InternalArea
         {
 
             get;
@@ -36,7 +36,7 @@ namespace DynamoMEP
         /// </summary>
         public override DB.Element InternalElement
         {
-            get { return InternalSpace; }
+            get { return InternalArea; }
         }
 
         internal List<DB.BoundarySegment> InternalBoundarySegments = new List<DB.BoundarySegment>();
@@ -48,18 +48,18 @@ namespace DynamoMEP
         /// <summary>
         /// Create from an existing Revit Element
         /// </summary>
-        /// <param name="space">An existing Revit space</param>
-        private Space(DB.Mechanical.Space space)
+        /// <param name="area">An existing Revit space</param>
+        private Area(DB.Area area)
         {
-            SafeInit(() => InitSpace(space));
+            SafeInit(() => InitSpace(area));
         }
 
 
-        private Space(
-            DB.Level level,
+        private Area(
+            DB.ViewPlan areaView,
             DB.UV point)
         {
-            SafeInit(() => InitSpace(level, point));
+            SafeInit(() => InitArea(areaView, point));
         }
 
         #endregion
@@ -69,10 +69,10 @@ namespace DynamoMEP
         /// <summary>
         /// Initialize a Space element
         /// </summary>
-        /// <param name="room"></param>
-        private void InitSpace(DB.Mechanical.Space room)
+        /// <param name="area"></param>
+        private void InitSpace(DB.Area area)
         {
-            InternalSetSpace(room);
+            InternalSetSpace(area);
         }
 
         /// <summary>
@@ -85,8 +85,8 @@ namespace DynamoMEP
         }
 
 
-        private void InitSpace(
-            DB.Level level,
+        private void InitArea(
+            DB.ViewPlan areaView,
             DB.UV point)
         {
             DB.Document document = DocumentManager.Instance.CurrentDBDocument;
@@ -95,18 +95,18 @@ namespace DynamoMEP
             TransactionManager.Instance.EnsureInTransaction(document);
 
             //Phase 1 - Check to see if the object exists and should be rebound
-            var roomElem = ElementBinder.GetElementFromTrace<DB.Mechanical.Space>(document);
+            var areaElement = ElementBinder.GetElementFromTrace<DB.Area>(document);
 
-            if (roomElem == null)
+            if (areaElement == null)
             {
-                roomElem = document.Create.NewSpace(level, point);
+                areaElement = document.Create.NewArea(areaView, point);
             }
 
-            InternalSetSpace(roomElem);
+            InternalSetSpace(areaElement);
 
             TransactionManager.Instance.TransactionTaskDone();
 
-            if (roomElem != null)
+            if (areaElement != null)
             {
                 ElementBinder.CleanupAndSetElementForTrace(document, this.InternalElement);
             }
@@ -124,12 +124,12 @@ namespace DynamoMEP
         /// <summary>
         /// Set the internal Element, ElementId, and UniqueId
         /// </summary>
-        /// <param name="space"></param>
-        private void InternalSetSpace(DB.Mechanical.Space space)
+        /// <param name="area"></param>
+        private void InternalSetSpace(DB.Area area)
         {
-            InternalSpace = space;
-            InternalElementId = space.Id;
-            InternalUniqueId = space.UniqueId;
+            InternalArea = area;
+            InternalElementId = area.Id;
+            InternalUniqueId = area.UniqueId;
             InternalBoundarySegments = GetBoundarySegment();
             InternalTransform = GetTransform();
         }
@@ -142,30 +142,34 @@ namespace DynamoMEP
             }
             else
             {
-                //Find the revit instance where we find the room
+                //Find the revit instance where we find the area
                 DB.FilteredElementCollector collector = new DB.FilteredElementCollector(DocumentManager.Instance.CurrentDBDocument);
                 List<DB.RevitLinkInstance> linkInstances = collector.OfCategory(DB.BuiltInCategory.OST_RvtLinks).WhereElementIsNotElementType().ToElements().Cast<DB.RevitLinkInstance>().ToList();
-                DB.RevitLinkInstance roomLinkInstance = linkInstances.FirstOrDefault();
+                DB.RevitLinkInstance areaLinkInstance = linkInstances.FirstOrDefault();
 
                 foreach (DB.RevitLinkInstance linkInstance in linkInstances)
                 {
                     if (linkInstance.GetLinkDocument().GetHashCode() == InternalElement.Document.GetHashCode())
                     {
-                        roomLinkInstance = linkInstance;
+                        areaLinkInstance = linkInstance;
                         break;
                     }
                 }
 
-                return roomLinkInstance.GetTotalTransform();
+                return areaLinkInstance.GetTotalTransform();
             }
         }
 
         private List<DB.BoundarySegment> GetBoundarySegment()
         {
             List<DB.BoundarySegment> output = new List<DB.BoundarySegment>();
-            DB.SpatialElementBoundaryOptions opt = new DB.SpatialElementBoundaryOptions();
+            DB.SpatialElementBoundaryOptions boundaryOptions = new DB.SpatialElementBoundaryOptions
+            {
+                StoreFreeBoundaryFaces = true,
+                SpatialElementBoundaryLocation = DB.SpatialElementBoundaryLocation.Center
+            };
 
-            foreach (List<DB.BoundarySegment> segments in InternalSpace.GetBoundarySegments(opt))
+            foreach (List<DB.BoundarySegment> segments in InternalArea.GetBoundarySegments(boundaryOptions))
             {
                 foreach (DB.BoundarySegment segment in segments)
                 {
@@ -181,81 +185,37 @@ namespace DynamoMEP
         #region Public static constructors
 
         /// <summary>
-        /// Create a MEP Space
-        /// based on a location and a level
+        /// Create a Revit Area
+        /// based on a location and a view plan
         /// </summary>
-        /// <param name="point">Location point for the space</param>
-        /// <param name="level">Level of the space</param>
+        /// <param name="point">Location point for the area</param>
+        /// <param name="areaView">The View plan of the area</param>
         /// <returns></returns>
-        public static Space ByPointAndLevel(Point point, Level level)
+        public static Area ByPointAndView(Point point, Revit.Elements.Views.AreaPlanView areaView)
         {
-            DB.Level revitLevel = level.InternalElement as DB.Level;
+            DB.ViewPlan revitViewPlan = areaView.InternalElement as DB.ViewPlan;
             DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
 
             DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
 
-            return new Space(revitLevel, uv);
+            return new Area(revitViewPlan, uv);
         }
 
         /// <summary>
-        /// Create a `MEP Space
-        /// based on a location
-        /// </summary>
-        /// <param name="point">Location point for the space</param>
-        /// <returns></returns>
-        public static Space ByPoint(Point point)
-        {
-            DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
-            DB.Level revitLevel = GetNearestLevel(revitPoint);
-
-            DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
-
-            return new Space(revitLevel, uv);
-        }
-
-        /// <summary>
-        /// Find the nearest level in the active document
-        /// </summary>
-        /// <param name="point">The reference point</param>
-        /// <returns></returns>
-        private static DB.Level GetNearestLevel(DB.XYZ point)
-        {
-            //find all level in the active document
-            DB.Document doc = DocumentManager.Instance.CurrentDBDocument;
-
-            DB.FilteredElementCollector collector = new DB.FilteredElementCollector(doc);
-            List<DB.Level> activeLevels = collector.OfCategory(DB.BuiltInCategory.OST_Levels).WhereElementIsNotElementType().ToElements().Cast<DB.Level>().ToList();
-
-            DB.Level nearestLevel = activeLevels.FirstOrDefault();
-            double delta = Math.Abs(nearestLevel.ProjectElevation - point.Z);
-
-            foreach (DB.Level currentLevel in activeLevels)
-            {
-                if (Math.Abs(currentLevel.ProjectElevation - point.Z) < delta)
-                {
-                    nearestLevel = currentLevel;
-                    delta = Math.Abs(currentLevel.ProjectElevation - point.Z);
-                }
-            }
-
-            return nearestLevel;
-        }
-
-        /// <summary>
-        /// Create a MEP Space
-        /// from an existing MEP Space
+        /// Create a Revit Area
+        /// from an existing Revit Area
         /// </summary>
         /// <param name="element">The origin element</param>
         /// <returns></returns>
-        public static Space FromElement(Element element)
+        public static Area FromElement(Element element)
         {
-            if (element.InternalElement.GetType() == typeof(DB.Mechanical.Space))
+            if (element.InternalElement.GetType() == typeof(DB.Area))
             {
-                return new Space(element.InternalElement as DB.Mechanical.Space);
+                return new Area(element.InternalElement as DB.Area);
             }
             else
             {
-                throw new ArgumentException("The Element is not a MEP Space");
+                throw new ArgumentException("The Element is not a Revit Area");
             }
         }
 
@@ -265,33 +225,22 @@ namespace DynamoMEP
 
         /// <summary>
         /// Retrive a set of properties 
-        /// for the Space
+        /// for the Area
         /// </summary>
-        /// <returns name="Name">The MEPSpace Name</returns>
-        /// <returns name="Number">The MEPSpace Number</returns>
-        /// <returns name="CustomRoom Name">The associated room Name</returns>
-        /// <returns name="CustomRoom Number">The associated room Number</returns>
-        [MultiReturn(new[] { "Name", "Number", "CustomRoom Number", "CustomRoom Name" })]
+        /// <returns name="Name">The Area Name</returns>
+        /// <returns name="Number">The Area Number</returns>
+        [MultiReturn(new[] { "Name", "Number" })]
         public Dictionary<string, string> GetIdentificationData()
         {
-            string roomName = "Unoccupied";
-            string roomNumber = "Unoccupied";
-            if (InternalSpace.Room != null)
-            {
-                roomName = InternalSpace.Room.Name;
-                roomNumber = InternalSpace.Room.Number;
-            }
             return new Dictionary<string, string>()
                 {
-                    {"Name",InternalSpace.Name},
-                    {"Number",InternalSpace.Number},
-                    {"CustomRoom Name",roomName},
-                    {"CustomRoom Number",roomNumber}
+                    {"Name",InternalArea.Name},
+                    {"Number",InternalArea.Number}
                 };
         }
 
         /// <summary>
-        /// Retrive space boundary elements
+        /// Retrive area boundary elements
         /// </summary>
         public List<Element> BoundaryElements
         {
@@ -335,7 +284,7 @@ namespace DynamoMEP
         }
 
         /// <summary>
-        /// Retrive the sapce location
+        /// Retrive the area location
         /// </summary>
         public Point LocationPoint
         {
@@ -346,89 +295,20 @@ namespace DynamoMEP
             }
         }
 
-        /// <summary>
-        /// Determine if an element lies
-        /// within the volume of the Space
-        /// </summary>
-        public bool IsInSpace(Element element)
-        {
-            DB.FamilyInstance familyInstance = element.InternalElement as DB.FamilyInstance;
-            if (familyInstance != null)
-            {
-                if (familyInstance.HasSpatialElementCalculationPoint)
-                {
-                    DB.XYZ insertionPoint = familyInstance.GetSpatialElementCalculationPoint();
-
-                    if (InternalSpace.IsPointInSpace(insertionPoint))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            DB.LocationPoint insertionLocationPoint = element.InternalElement.Location as DB.LocationPoint;
-            if (insertionLocationPoint != null)
-            {
-                DB.XYZ insertionPoint = insertionLocationPoint.Point;
-
-                if (InternalSpace.IsPointInSpace(insertionPoint))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-            
-        }
-
-
-        /// <summary>
-        /// Return a grid of points in the space
-        /// </summary>
-        /// <param name="step">Lenght between two points</param>
-        public List<Point> Grid(double step)
-        {
-            step = UnitConverter.DynamoToHostFactor(DB.UnitType.UT_Length) * step;
-            List<Point> grid = new List<Point>();
-
-            DB.BoundingBoxXYZ bb = InternalElement.get_BoundingBox(null);
-
-            for (double x = bb.Min.X; x < bb.Max.X;)
-            {
-                for (double y = bb.Min.Y; y < bb.Max.Y;)
-                {
-                    DB.XYZ point = new DB.XYZ(x, y, bb.Min.Z);
-                    if (InternalSpace.IsPointInSpace(point))
-                    {
-                        grid.Add(GeometryPrimitiveConverter.ToPoint(InternalTransform.OfPoint(point)));
-                    }
-                    y = y + step;
-                }
-
-                x = x + step;
-            }
-
-            return grid;
-        }
-
 
         #endregion
 
         #region Internal static constructors
 
         /// <summary>
-        /// Create a space from an existing reference
+        /// Create a REvit area from an existing reference
         /// </summary>
-        /// <param name="space"></param>
+        /// <param name="area"></param>
         /// <param name="isRevitOwned"></param>
         /// <returns></returns>
-        internal static Space FromExisting(DB.Mechanical.Space space, bool isRevitOwned)
+        internal static Area FromExisting(DB.Area area, bool isRevitOwned)
         {
-            return new Space(space)
+            return new Area(area)
             {
                 //IsRevitOwned = isRevitOwned
             };
@@ -491,7 +371,7 @@ namespace DynamoMEP
         /// <returns>The string representation of our object.</returns>
         public override string ToString()
         {
-            return string.Format("Space {1} - {0}", InternalSpace.Name, InternalSpace.Number);
+            return string.Format("Area {1} - {0}", InternalArea.Name, InternalArea.Number);
         }
 
         #endregion

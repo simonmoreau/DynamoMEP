@@ -1,7 +1,7 @@
 ﻿using System;
 using DB = Autodesk.Revit.DB;
-using UI = Autodesk.Revit.UI;
 using DynamoServices;
+using Revit.Elements;
 using Autodesk.DesignScript.Runtime;
 using Autodesk.DesignScript.Geometry;
 using Autodesk.DesignScript.Interfaces;
@@ -11,7 +11,7 @@ using RevitServices.Transactions;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Revit.Elements
+namespace DynamoMEP
 {
     /// <summary>
     /// Revit GroupType
@@ -252,6 +252,32 @@ namespace Revit.Elements
             {
                 throw new ArgumentException("The Element is not a Revit GroupType");
             }
+        }
+
+        /// <summary>
+        /// Get a GroupType
+        /// from its name
+        /// </summary>
+        /// <param name="name">The name of the group type</param>
+        /// <returns></returns>
+        public static GroupType FromName(string name)
+        {
+            DB.Document document = DocumentManager.Instance.CurrentDBDocument;
+
+            //Find all groupType in the document
+            DB.FilteredElementCollector collector = new DB.FilteredElementCollector(document);
+            List<DB.GroupType> groupTypes = collector.OfClass(typeof(DB.GroupType)).ToElements().Cast<DB.GroupType>().ToList();
+
+            DB.GroupType groupType = groupTypes.Where(g => g.Name == name).FirstOrDefault();
+            if (groupType !=null)
+            {
+                return new GroupType(groupType);
+            }
+            else
+            {
+                throw new ArgumentException("No group with this name was found.");
+            }
+
         }
 
         #endregion

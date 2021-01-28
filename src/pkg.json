@@ -2,7 +2,7 @@
   "license": "",
   "file_hash": null,
   "name": "DynamoMEP",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "DynamoMEP is a package for working with MEP elements, Rooms and Spaces.",
   "group": "",
   "keywords": [

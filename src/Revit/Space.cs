@@ -392,7 +392,16 @@ namespace DynamoMEP
         /// <param name="step">Lenght between two points</param>
         public List<Point> Grid(double step)
         {
-            step = UnitConverter.DynamoToHostFactor(DB.UnitType.UT_Length) * step;
+            try
+            {
+                step = Services.ConvertStepDeprecated(step);
+            }
+            catch (Exception)
+            {
+
+                step = Services.ConvertStep(step);
+            }
+
             List<Point> grid = new List<Point>();
 
             DB.BoundingBoxXYZ bb = InternalElement.get_BoundingBox(null);

@@ -34,16 +34,16 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DynamoServices, Version=2.6.1.8786, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\DynamoVisualProgramming.DynamoServices.2.6.1.8786\lib\net47\DynamoServices.dll</HintPath>
+    <Reference Include="DynamoServices, Version=2.10.0.3455, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\DynamoVisualProgramming.DynamoServices.2.10.0.3455\lib\net48\DynamoServices.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="DynamoUnits, Version=2.6.1.8786, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\DynamoVisualProgramming.ZeroTouchLibrary.2.6.1.8786\lib\net47\DynamoUnits.dll</HintPath>
+    <Reference Include="DynamoUnits, Version=2.10.0.3455, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\DynamoVisualProgramming.ZeroTouchLibrary.2.10.0.3455\lib\net48\DynamoUnits.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ProtoGeometry, Version=2.6.0.8195, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\DynamoVisualProgramming.ZeroTouchLibrary.2.6.1.8786\lib\net47\ProtoGeometry.dll</HintPath>
+    <Reference Include="ProtoGeometry, Version=2.9.0.3355, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>packages\DynamoVisualProgramming.ZeroTouchLibrary.2.10.0.3455\lib\net48\ProtoGeometry.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPI">
@@ -77,17 +77,21 @@
     <Compile Include="Revit\GroupType.cs" />
     <Compile Include="Revit\Room.cs" />
     <Compile Include="Revit\RoomSeparator.cs" />
+    <Compile Include="Revit\Services.cs" />
     <Compile Include="Revit\Space.cs" />
     <Compile Include="Revit\SpaceSeparator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="pkg.json" />
+    <None Include="PostBuild.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DynamoMEP_DynamoCustomization.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="images\logo.png" />
     <Content Include="Resources\DynamoMEP.About.AboutDynamoMEP.Large.png" />
     <Content Include="Resources\DynamoMEP.About.AboutDynamoMEP.Small.png" />
     <Content Include="Resources\DynamoMEP.Area.BoundaryElements.Large.png" />
@@ -175,27 +179,13 @@
     <ProjectReference Include="..\DynamoMEP.UI\DynamoMEPUI.csproj">
       <Project>{52b736f1-3bd9-47c7-a3e8-3a801dfb02c0}</Project>
       <Name>DynamoMEPUI</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>set SolutionName=DynamoMEP
-set SigntoolPath="C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe"
-set dlls="$(TargetPath) $(TargetDir)$(ProjectName).customization.dll $(TargetDir)$(ProjectName)UI.customization.dll"
-echo %25dlls%25
-
-call %25SigntoolPath%25 sign /sha1 3b428f7d77548f2f10a204bd551da1c3ede7c0e7 /d "%25SolutioName%25" /du "http://www.eai.fr" /t "http://timestamp.comodoca.com/authenticode" /fd sha256 "%25dlls%25"
-
-set packagePath="$(AppData)\Dynamo\Dynamo Revit\2.5\packages\$(ProjectName)"
-set binpath="$(AppData)\Dynamo\Dynamo Revit\2.5\packages\$(ProjectName)\bin\"
-
-echo %25binpath%25
-
-copy "$(TargetDir)*.customization.dll" %25binpath%25
-copy "$(TargetDir)*.dll" %25binpath%25
-copy "$(TargetDir)*.xml" %25binpath%25
-copy "$(ProjectDir)pkg.json" %25packagePath%25</PostBuildEvent>
+    <PostBuildEvent>powershell -ExecutionPolicy Unrestricted $(ProjectDir)PostBuild.ps1 -Configuration $(Configuration) -TargetName $(TargetName) -ProjectDir $(ProjectDir) -TargetPath $(TargetPath) -TargetDir $(TargetDir)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -41,7 +41,16 @@ namespace DynamoMEP
         /// <param name="step">Lenght between two points</param>
         public static List<Point> Grid(this Revit.Elements.Room room, double step)
         {
-            step = UnitConverter.DynamoToHostFactor(DB.UnitType.UT_Length) * step;
+            try
+            {
+                step = Services.ConvertStepDeprecated(step);
+            }
+            catch (Exception)
+            {
+
+                step = Services.ConvertStep(step);
+            }
+            
             List<Point> grid = new List<Point>();
             DB.Architecture.Room InternalRoom = room.InternalElement as DB.Architecture.Room;
 
